@@ -1,42 +1,39 @@
+{% load static %}
 {% include 'reusable.html' %}
-<title>Logiciel - Order Events</title>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<body class="hold-transition layout-top-nav">
-{% include 'navbar.html' %}
+<body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
-    <div class="content-wrapper">
-        <div class="content-header">
-            {% include 'sidebar.html' %}
 
-            <div class="container">
+    <!-- Navbar -->
+    {% include 'navbar.html' %}
+    <!-- /.navbar -->
+
+    {% include 'sidebar.html' %}
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <div class="page-title d-flex">
-                            <!--                            <h4><i class="icon-arrow-right6 mr-2"></i> <span-->
-                            <!--                                    class="font-weight-semibold">Dashboard:-</span> Autos Software</h4>-->
-                        </div>
-                        <h1 class="m-0 text-dark"><small></small></h1>
+                        <h1 class="m-0">Logiciel - Dashboard</h1>
                     </div><!-- /.col -->
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
                             <li class="breadcrumb-item"><a href="/Dashboard" style="color:black"><i
-                                    class="fa fa-home"></i> </a>
+                                    class="fa fa-home"></i></a>
                             </li>
-
                             <li class="breadcrumb-item active">Order Events</li>
                         </ol>
-                    </div>
-                </div>
-            </div>
+                    </div><!-- /.col -->
+                </div><!-- /.row -->
+            </div><!-- /.container-fluid -->
         </div>
+        <!-- /.content-header -->
 
         <!-- Main content -->
-        <div class="content">
-
-            <div class="container">
-
-
+        <section class="content">
+            <div class="container-fluid">
                 <div class="card card-primary">
                     <div class="card-header">
                         <h3 class="card-title">Order Events</h3>
@@ -92,15 +89,16 @@
                         </script>
                     {% endif %}
                 </div>
-            </div>
-        </div>
+
+            </div><!-- /.container-fluid -->
+        </section>
+        <!-- /.content -->
     </div>
+    <!-- /.content-wrapper -->
+
+
+    {% include 'footer.html' %}
 
 
 </div>
-<!-- Main Footer -->
-{% include 'footer.html' %}
 </body>
-
-
-</html>
