@@ -1,0 +1,135 @@
+ {% load static %}
+  <title>Django Registration </title>
+ {% include 'reusable.html' %}
+</head>
+
+
+<body class="hold-transition layout-top-nav">
+{% include 'navbar.html' %}
+<div class="wrapper">
+    <div class="content-wrapper">
+        <div class="content-header">
+            <div class="container">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <div class="page-title d-flex">
+                            <!--                            <h4><i class="icon-arrow-right6 mr-2"></i> <span-->
+                            <!--                                    class="font-weight-semibold">Dashboard:-</span> Autos Software</h4>-->
+                        </div>
+                        <h1 class="m-0 text-dark"><small></small></h1>
+                    </div><!-- /.col -->
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="Dashboard" style="color:black"><i class="fa fa-home"></i> </a>
+                            </li>
+                               {% if EmpID != "" %}
+                      <li class="breadcrumb-item active">Edit User</li>
+
+            {% else %}
+                            <li class="breadcrumb-item active">User's Registration</li>
+
+            {% endif %}
+
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="content container">
+
+
+<div class="login-box">
+  <!-- /.login-logo -->
+  <div class="card">
+    <div class="card-body login-card-body">
+      <p class="login-box-msg">Registered in to start your session</p>
+
+      <form action="AddUser" method="post">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" placeholder="Emp Name" name="emp_name" value="{{Emp_Name}}">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-user"></span>
+            </div>
+          </div>
+        </div>
+
+          <div class="input-group mb-3">
+          <input type="text" class="form-control" placeholder="Emp Email" name="emp_email" value="{{Emp_Email}}">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-envelope"></span>
+            </div>
+          </div>
+        </div>
+
+           <div class="input-group mb-3">
+          <input type="text" class="form-control" placeholder="Emp Age" name="emp_age" value="{{Emp_Age}}">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-user"></span>
+            </div>
+          </div>
+        </div>
+
+           <div class="input-group mb-3">
+          <input type="text" class="form-control" placeholder="Emp Designation" name="emp_designation" value="{{EmpDesignation}}">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-box"></span>
+            </div>
+          </div>
+        </div>
+
+           <div class="input-group mb-3">
+          <input type="text" class="form-control" placeholder="Emp Address" name="emp_address" value="{{EmpAddress}}">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-user"></span>
+            </div>
+          </div>
+        </div>
+        <div class="input-group mb-3" {{Type}}>
+          <input type="password" class="form-control" placeholder="Password" name="emp_pwd" value="{{Emp_PWD}}" >
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-lock"></span>
+            </div>
+          </div>
+        </div>
+
+      <input type="hidden" value="{{EmpID}}" name="hd_Id">
+        <div class="row">
+          <div class="col-12">
+            {% if EmpID != "" %}
+                  <button type="submit" class="btn btn-primary btn-block">Edit</button>
+            {% else %}
+                      <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+            {% endif %}
+
+
+          </div>
+          <!-- /.col -->
+
+          <!-- /.col -->
+        </div>
+
+      </form>
+
+    </div>
+    <!-- /.login-card-body -->
+  </div>
+</div>
+<!-- /.login-box -->
+
+
+</div>
+    </div>
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,68 @@
+{% include 'reusable.html' %}
+<title>Logiciel - Order Trails </title>
+<body class="hold-transition layout-top-nav">
+{% include 'navbar.html' %}
+<div class="wrapper">
+    <div class="content-wrapper">
+        <div class="content-header">
+            {% include 'sidebar.html' %}
+
+            <div class="container">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <div class="page-title d-flex">
+                            <!--                            <h4><i class="icon-arrow-right6 mr-2"></i> <span-->
+                            <!--                                    class="font-weight-semibold">Dashboard:-</span> Autos Software</h4>-->
+                        </div>
+                        <h1 class="m-0 text-dark"><small></small></h1>
+                    </div><!-- /.col -->
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="/Dashboard" style="color:black"><i
+                                    class="fa fa-home"></i> </a>
+                            </li>
+
+                            <li class="breadcrumb-item active">Order Trails</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="content">
+
+            <div class="container">
+
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Order Trails - Form</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <!-- form start -->
+                    <form method="post" action="/Logs">
+                        {% csrf_token %}
+                        <div class="card-body">
+                            <div class="form-group">
+                                <textarea rows="20" cols="300" class="form-control" name="FixLogs" required></textarea>
+                            </div>
+
+                        </div>
+                        <!-- /.card-body -->
+
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- Main Footer -->
+{% include 'footer.html' %}
+
+
+</body>
+</html>
