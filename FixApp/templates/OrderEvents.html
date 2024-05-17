@@ -78,13 +78,12 @@
                 </div>
                 <div class="row p-2">
 
-
                     {% if message %}
                         <script>
                             Swal.fire({
-                                title: "MENO !",
+                                title: " {{ title }}",
                                 text: " {{ message }}",
-                                icon: "success"
+                                icon: "{{ icon }}"
                             });
                         </script>
                     {% endif %}

@@ -85,12 +85,15 @@ def OrderEvents(request):
             CAT_IM_ID = request.POST['CAT_IM_ID']
             FD_ID = request.POST['FD_ID']
             Trading_Session = request.POST['Trading_Session']
+            if CAT_IM_ID == '' or FD_ID == '' or Trading_Session == '':
+                return render(request, 'OrderEvents.html',
+                              {'title': 'Required !', 'icon': 'error', 'message': 'One or more fields are missing!'})
             file_Name = request.POST['file']
             result = readCSV(file_Name, CAT_IM_ID, FD_ID, Trading_Session)
 
-            # return HttpResponse(res, content_type='text/csv')
             try:
-                return render(request, 'OrderEvents.html', {'message': result})
+                return render(request, 'OrderEvents.html',
+                              {'title': 'Required !', 'icon': 'success', 'message': result})
             except Exception as e:
                 return render(request, 'OrderEvents.html', {'message': "Exception CSV File :" + str(e)})
         else:
