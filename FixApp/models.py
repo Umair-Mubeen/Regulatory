@@ -66,3 +66,13 @@ class OrderEvent(models.Model):
     Fix_Col_26 = models.CharField(max_length=50)
     Fix_Col_27 = models.CharField(max_length=50)
     Fix_Col_28 = models.CharField(max_length=50)
+
+
+class Reports(models.Model):
+    Report_Name = models.CharField(max_length=50)
+    CAT_IMID = models.CharField(max_length=50)
+    FD_ID = models.CharField(max_length=50)
+    Train_Session = models.CharField(max_length=50)
+    FileName = models.CharField(max_length=50)
+    FileType = models.CharField(max_length=50)
+    Status = models.CharField(max_length=50, default='')

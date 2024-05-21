@@ -1,5 +1,6 @@
 {% load static %}
 {% include 'reusable.html' %}
+<title>Logiciel - Order Events </title>
 
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
@@ -40,7 +41,7 @@
                     </div>
                     <!-- /.card-header -->
                     <!-- form start -->
-                    <form method="post" action="/OrderEvents">
+                    <form method="post" action="/OrderEvents" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="card-body">
                             <div class="form-group">
@@ -57,11 +58,14 @@
                                 <input type="text" class="form-control" placeholder="Enter Trading Session "
                                        name="Trading_Session"/>
                             </div>
+                         
                             <div class="form-group">
                                 <label for="exampleInputFile">Import File</label>
                                 <div class="input-group">
                                     <div class="custom-file">
-                                        <input type="file" class="custom-file-input" id="exampleInputFile" name="file">
+                                        <input type="file" class="custom-file-input" id="file-input" name="file"
+                                               onchange="checkFileSelected()">
+
                                         <label class="custom-file-label" for="exampleInputFile">Choose file</label>
                                     </div>
 
@@ -72,7 +76,7 @@
                         <!-- /.card-body -->
 
                         <div class="card-footer">
-                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <button type="submit" class="btn btn-primary" id="submit" disabled>Submit</button>
                         </div>
                     </form>
                 </div>
@@ -101,3 +105,13 @@
 
 </div>
 </body>
+
+<script>
+    function checkFileSelected() {
+        const fileInput = document.getElementById('file-input');
+        const submitButton = document.getElementById('submit');
+
+        // Enable the submit button if a file is selected, otherwise disable it
+        submitButton.disabled = !fileInput.files.length;
+    }
+</script>
