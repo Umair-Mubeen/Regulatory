@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from .models import Employee, OrderEvent, Reports
 import os
-from .Utilities import readCSV_MEOR, readCSV_MENO, generateMEOR, downloadCSV
+from .Utilities import readCSV_MEOR, readCSV_MENO, generateMEOR, downloadCSV, mergeCSV
 
 
 def index(request):
@@ -123,7 +123,9 @@ def OrderEvents(request):
             result_MENO = readCSV_MENO(file_path, CAT_IM_ID, FD_ID, Trading_Session)
             generateMEOR(file_path, CAT_IM_ID, FD_ID, Trading_Session)
             result_MEOR = readCSV_MEOR(file_path, CAT_IM_ID, FD_ID, Trading_Session)
+
             result = pd.concat([result_MENO, result_MEOR], axis=0, ignore_index=True)
+            result.to_csv("combined_result.csv", index=False)
             try:
                 return downloadCSV(result)
             except Exception as e:

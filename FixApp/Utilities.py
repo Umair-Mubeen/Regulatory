@@ -18,7 +18,7 @@ def readCSV_MEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
         fileName = filePath.split("\\")[-1]
         columns = ['Order Event', 'Fix_Col_0', 'FirmROID', 'MsgType', 'CAT_IM_ID', 'Date', 'Order ID', 'Symbol',
                    'Fix_Col_1', 'TimeStamp', 'Fix_Col_2', 'Fix_Col_3', 'Fix_Col_4', 'Fix_Col_5', 'SideType', 'Price',
-                   'Quantity', 'Fix_Col_6', 'OrderType', 'TIF', 'Trading_Session', 'Fix_Col_7', 'Fix_Col_8',
+                   'Quantity', 'Fix_Col_6', 'OrderType', 'TIF', 'Trading_Session', 'FDID', 'Fix_Col_7', 'Fix_Col_8',
                    'Fix_Col_9', 'Fix_Col_10', 'Fix_Col_11', 'Fix_Col_12', 'Fix_Col_13', 'Fix_Col_14', 'Fix_Col_15',
                    'Fix_Col_16']
 
@@ -47,38 +47,48 @@ def readCSV_MEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
             new_df.loc[index, 'Order ID'] = "CAT-" + CAT_IM_ID + '-' + "OrderID-" + f'{counter}'
             counter += 1
         new_df['Symbol'] = df['Symbol']
-        new_df['Fix_Col_1'] = ''
-        new_df['TimeStamp'] = df['Event Timestamp']
+        new_df['Fix_Col_1'] = df['Event Timestamp']
+        new_df['TimeStamp'] = ''
         new_df['Fix_Col_2'] = 'False'
         new_df['Fix_Col_3'] = 'False'
         new_df['Fix_Col_4'] = ''
 
         new_df['Fix_Col_5'] = df['Sender IMID']
-        new_df['SideType'] = df['Side']
+        new_df['SideType'] = ''
+        new_df['Price'] = df['Side']
+
         if df['Price'].eq('').all():  # check if Price has no value then replace with empty
             df.loc[df['Price'] == '', 'Price'] = ''
-        new_df['Price'] = df['Price']
-        new_df['Quantity'] = df['Quantity']
+        # new_df['Price'] = df['Price']
+        new_df['Quantity'] = df['Price']
+
+        # new_df['Quantity'] = df['Quantity']
         new_df['Fix_Col_6'] = df['Receiver IMID']
-        new_df['OrderType'] = np.where(df['Price'].notnull(), 'LMT', 'MKT')
-        new_df['TIF'] = "GTX=" + pd.to_datetime(df['Event Timestamp']).dt.strftime('%Y%m%d').astype(str)
-        new_df['Trading_Session'] = Trading_Session
+        # new_df['OrderType'] = np.where(df['Price'].notnull(), 'LMT', 'MKT')
+        new_df['OrderType'] = ''
+
+        # new_df['TIF'] = "GTX=" + pd.to_datetime(df['Event Timestamp']).dt.strftime('%Y%m%d').astype(str)
+
+        new_df['TIF'] = np.where(df['Price'].notnull(), 'LMT', 'MKT')
+
+        # new_df['Trading_Session'] = Trading_Session
+        new_df['Trading_Session'] = "GTX=" + pd.to_datetime(df['Event Timestamp']).dt.strftime('%Y%m%d').astype(str)
         new_df['Fix_Col_7'] = 'F'
         new_df['Fix_Col_8'] = df['Routed Order ID']
-        new_df['Fix_Col_9'] = ''
-        new_df['Fix_Col_10'] = 'False'
-        new_df['Fix_Col_11'] = 'NA'
-        new_df['Acc Type'] = 'False'
+        new_df['Fix_Col_9'] = df['Quantity']
+        new_df['Fix_Col_10'] = Trading_Session
+        new_df['Fix_Col_11'] = 'False'
+        new_df['FDID'] = 'NA'
+        new_df['Acc Type'] = ''
         new_df['Fix_Col_12'] = 'False'
-        new_df['Fix_Col_13'] = ''
-        new_df['Fix_Col_14'] = 'False'
-        new_df['Fix_Col_15'] = ''
+        new_df['Fix_Col_13'] = 'False'
+        new_df['Fix_Col_14'] = ''
+        new_df['Fix_Col_15'] = 'False'
         new_df['Fix_Col_16'] = ''
         try:
             report = Reports(Report_Name='MEOR', CAT_IMID=CAT_IM_ID, FD_ID=FD_ID, Train_Session=Trading_Session,
                              FileType='CSV', Status='Completed', FileName=fileName)
             report.save()
-            orderEventInsertion(new_df)
             return new_df
         except Exception as e:
             print("CSV to DataFrame Exception :-" + str(e))
@@ -103,8 +113,7 @@ def generateMEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
                    'Fix_Col_1', 'TimeStamp', 'Fix_Col_2', 'Fix_Col_3', 'Fix_Col_4', 'Sender_IM_ID',
                    'Receiver_IM_ID', 'Firm_Exchange', 'Routed_OrderID', 'Fix_Col_5', 'SideType', 'Price', 'Quantity',
                    'Fix_Col_6', 'OrderType', 'TIF', 'Trading_Session', 'Fix_Col_7', 'Fix_Col_8', 'Fix_Col_9',
-                   'Fix_Col_10', 'Fix_Col_11', 'Fix_Col_12', 'Fix_Col_13', 'Fix_Col_14', 'Fix_Col_15', 'Fix_Col_16',
-                   'Fix_Col_17']
+                   'Fix_Col_10', 'Fix_Col_11', 'Fix_Col_12', 'Fix_Col_13', 'Fix_Col_14', 'Fix_Col_15', 'Fix_Col_16']
 
         new_df = pd.DataFrame(columns=columns)
         new_df['Fix_Col_0'] = ''
@@ -161,7 +170,6 @@ def generateMEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
         new_df['Fix_Col_14'] = ''
         new_df['Fix_Col_15'] = ''
         new_df['Fix_Col_16'] = ''
-        new_df['Fix_Col_17'] = ''
         try:
             new_df.to_csv('MEOR_Creation.csv', index=False)
             report = Reports(Report_Name='MEOR', CAT_IMID=CAT_IM_ID, FD_ID=FD_ID, Train_Session=Trading_Session,
@@ -311,7 +319,7 @@ def orderEventInsertion(dataframe):
                 Fix_Col_9=row['Fix_Col_9'],
                 OrderType=row['OrderType'],
                 TIF=row['TIF'],
-                Trading_Session=row['Trading Session'],
+                Trading_Session=row['Trading_Session'],
                 Fix_Col_10=row['Fix_Col_10'],
                 Fix_Col_11=row['Fix_Col_11'],
                 FD_ID=row['FDID'],
@@ -340,3 +348,10 @@ def orderEventInsertion(dataframe):
     except Exception as e:
         print("Bulk Insertion Exception: - " + str(e))
         return str("Bulk Insertion Exception: - " + str(e))
+
+
+def mergeCSV(dataframe_one, dataframe_two):
+    try:
+        pass
+    except Exception as e:
+        print("Merge CSV Exception :-" + str(e))
