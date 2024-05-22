@@ -1,0 +1,453 @@
+import pandas as pd
+import numpy as np
+from io import StringIO
+from django.http import HttpResponse
+
+def generate_firmroid(event_timestamp, cat_im_id, last_id):
+    return pd.to_datetime(event_timestamp).strftime('%Y%m%d') + "_CAT-" + cat_im_id + "-" + str(last_id)
+
+def transform_event_type(df, old_event_type, new_event_type):
+    filtered_df = df[df['Event Type'] == old_event_type]
+    if not filtered_df.empty and (filtered_df['Event Type'] == old_event_type).all():
+        filtered_df['Event Type'] = new_event_type
+    return filtered_df
+
+def create_new_dataframe(columns, cat_im_id, df, trading_session, fd_id=None):
+    new_df = pd.DataFrame(columns=columns)
+    new_df['Fix_Col_0'] = ''
+    new_df['FirmROID'] = (
+        pd.to_datetime(df['Event Timestamp']).dt.strftime('%Y%m%d').astype(str) + "_CAT-" + cat_im_id + "-" + (df.index + 1).astype(str)
+    )
+    new_df['Order Event'] = 'NEW'
+    new_df['MsgType'] = df['Event Type']
+    new_df['CAT_IM_ID'] = f'{cat_im_id}'
+    new_df['Date'] = pd.to_datetime(df['Event Timestamp']).dt.strftime('%Y%m%d').astype(str) + "T000000.00000000"
+    new_df['Order ID'] = ["CAT-" + cat_im_id + '-' + "OrderID-" + str(i+1) for i in range(len(df))]
+    new_df['TimeStamp'] = df['Event Timestamp']
+    new_df['Fix_Col_1'] = 'False'
+    new_df['Fix_Col_2'] = 'False'
+    new_df['Fix_Col_3'] = ''
+    new_df['Fix_Col_4'] = ''
+    new_df['Fix_Col_5'] = ''
+    new_df['Fix_Col_6'] = 'T'
+    new_df['Fix_Col_7'] = 'False'
+    new_df['Fix_Col_8'] = ''
+    new_df['SideType'] = df['Side']
+    new_df['Symbol'] = df['Symbol']
+    new_df['Price'] = df['Price']
+    new_df['Quantity'] = df['Quantity']
+    new_df['Fix_Col_9'] = ''
+    new_df['OrderType'] = np.where(df['Price'].notnull(), 'LMT', 'MKT')
+    new_df['TIF'] = "GTX=" + pd.to_datetime(df['Event Timestamp']).dt.strftime('%Y%m%d').astype(str)
+    new_df['Trading_Session'] = trading_session
+    new_df['Fix_Col_10'] = ''
+    new_df['Fix_Col_11'] = 'False'
+    new_df['FDID'] = fd_id if fd_id else ''
+    new_df['Acc Type'] = 'A'
+    new_df['Fix_Col_12'] = 'False'
+    new_df['Fix_Col_13'] = ''
+    new_df['Fix_Col_14'] = ''
+    new_df['Fix_Col_15'] = 'False'
+    new_df['Fix_Col_16'] = 'N'
+    new_df['Fix_Col_17'] = ''
+    new_df['Fix_Col_18'] = ''
+    new_df['Fix_Col_19'] = ''
+    new_df['Fix_Col_20'] = ''
+    new_df['Fix_Col_21'] = ''
+    new_df['Fix_Col_22'] = ''
+    new_df['Fix_Col_23'] = ''
+    new_df['Fix_Col_24'] = ''
+    new_df['Fix_Col_25'] = ''
+    new_df['Fix_Col_26'] = ''
+    new_df['Fix_Col_27'] = ''
+    new_df['Fix_Col_28'] = ''
+    new_df['Fix_Col_29'] = ''
+    return new_df
+
+def readCSV_MEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
+    try:
+        df = pd.read_csv(filePath)
+        df_MENO = pd.read_csv('MENO_Creation.csv')
+        last_FirmROID_MENO = df_MENO.tail(1)
+        lastID = int(last_FirmROID_MENO['FirmROID'].str.split('-').str[-1].iloc[-1])
+        fileName = filePath.split("\\")[-1]
+        
+        columns = [
+            'Order Event', 'Fix_Col_0', 'FirmROID', 'MsgType', 'CAT_IM_ID', 'Date', 'Order ID', 'Symbol',
+            'Fix_Col_1', 'TimeStamp', 'Fix_Col_2', 'Fix_Col_3', 'Fix_Col_4', 'Fix_Col_5', 'SideType', 'Price',
+            'Quantity', 'Fix_Col_6', 'OrderType', 'TIF', 'Trading_Session', 'Fix_Col_7', 'Fix_Col_8',
+            'Fix_Col_9', 'Fix_Col_10', 'Fix_Col_11', 'Fix_Col_12', 'Fix_Col_13', 'Fix_Col_14', 'Fix_Col_15',
+            'Fix_Col_16'
+        ] + ['Fix_Col_' + str(i) for i in range(17, 47)] # Handle up to 46 columns
+        
+        new_df = create_new_dataframe(columns, CAT_IM_ID, df, Trading_Session)
+        filtered_df = transform_event_type(df, 'MEOA', 'MEOR')
+        
+        new_df['MsgType'] = filtered_df['Event Type']
+        
+        try:
+            report = Reports(Report_Name='MEOR', CAT_IMID=CAT_IM_ID, FD_ID=FD_ID, Train_Session=Trading_Session,
+                             FileType='CSV', Status='Completed', FileName=fileName)
+            report.save()
+            orderEventInsertion(new_df)
+            return new_df
+        except Exception as e:
+            print("CSV to DataFrame Exception :-" + str(e))
+            return str("CSV to DataFrame Exception :- " + str(e))
+
+    except Exception as e:
+        print("Read CSV Error Exception :" + str(e))
+        return str("Read CSV Exception :- " + str(e))
+
+def readCSV_MENO(filePath, CAT_IM_ID, FD_ID, Trading_Session):
+    try:
+        df = pd.read_csv(filePath)
+        fileName = filePath.split("\\")[-1]
+        
+        columns = [
+            'Order Event', 'Fix_Col_0', 'FirmROID', 'MsgType', 'CAT_IM_ID', 'Date', 'Order ID', 'Symbol',
+            'TimeStamp', 'Fix_Col_1', 'Fix_Col_2', 'Fix_Col_3', 'Fix_Col_4', 'Fix_Col_5', 'Fix_Col_6',
+            'Fix_Col_7', 'Fix_Col_8', 'SideType', 'Price', 'Quantity', 'Fix_Col_9', 'OrderType', 'TIF',
+            'Trading_Session', 'Fix_Col_10', 'Fix_Col_11', 'FDID', 'Acc Type', 'Fix_Col_12', 'Fix_Col_13',
+            'Fix_Col_14', 'Fix_Col_15', 'Fix_Col_16', 'Fix_Col_17', 'Fix_Col_18', 'Fix_Col_19', 'Fix_Col_20',
+            'Fix_Col_21', 'Fix_Col_22', 'Fix_Col_23', 'Fix_Col_24', 'Fix_Col_25', 'Fix_Col_26', 'Fix_Col_27',
+            'Fix_Col_28', 'Fix_Col_29'
+        ] # Handle up to 36 columns
+        
+        new_df = create_new_dataframe(columns, CAT_IM_ID, df, Trading_Session, FD_ID)
+        filtered_df = transform_event_type(df, 'MEOA', 'MENO')
+        
+        new_df['MsgType'] = filtered_df['Event Type']
+        
+        try:
+            new_df.to_csv('MENO_Creation.csv', index=False)
+            report = Reports(Report_Name='MENO', CAT_IMID=CAT_IM_ID, FD_ID=FD_ID, Train_Session=Trading_Session,
+                             FileType='CSV', Status='Completed', FileName=fileName)
+            report.save()
+            orderEventInsertion(new_df)
+            return new_df
+        except Exception as e:
+            print("CSV to DataFrame Exception :-" + str(e))
+            return str("CSV to DataFrame Exception :- " + str(e))
+
+    except Exception as e:
+        print("Read CSV Error Exception :" + str(e))
+        return str("Read CSV Exception :- " + str(e))
+
+def downloadCSV(result):
+    try:
+        csv_buffer = StringIO()
+        result.to_csv(csv_buffer, header=False, index=False)
+        csv_buffer.seek(0)
+        response = HttpResponse(csv_buffer, content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="MENO_MEOR_File.csv"'
+        return response
+    except Exception as e:
+        print("Error while Downloading CSV Exception :-" + str(e))
+        return str("Error while Downloading CSV Exception")
+
+def process_files(file_path, CAT_IM_ID, FD_ID, Trading_Session):
+    try:
+        result_MENO = readCSV_MENO(file_path, CAT_IM_ID, FD_ID, Trading_Session)
+        result_MEOR = readCSV_MEOR(file_path, CAT_IM_ID, FD_ID, Trading_Session)
+        # Align columns before concatenation
+        result_MENO, result_MEOR = result_MENO.align(result_MEOR, join='outer', axis=1, fill_value='')
+        result = pd.concat([result_MENO, result_MEOR], axis=0, ignore_index=True)
+        return downloadCSV(result)
+    except Exception as e:
+        print("Error Exception :" + str(e))
+        return str("Error Exception :- " + str(e))
+
+----------------------------------------------------
+
+import pandas as pd
+import numpy as np
+from io import StringIO
+from django.http import HttpResponse
+
+def generate_firmroid(event_timestamp, cat_im_id, last_id):
+    return pd.to_datetime(event_timestamp).strftime('%Y%m%d') + "_CAT-" + cat_im_id + "-" + str(last_id)
+
+def transform_event_type(df, old_event_type, new_event_type):
+    filtered_df = df[df['Event Type'] == old_event_type]
+    if not filtered_df.empty and (filtered_df['Event Type'] == old_event_type).all():
+        filtered_df['Event Type'] = new_event_type
+    return filtered_df
+
+def create_new_dataframe(columns, cat_im_id, df, trading_session, fd_id=None):
+    new_df = pd.DataFrame(columns=columns)
+    new_df['Fix_Col_0'] = ''
+    new_df['FirmROID'] = (
+        pd.to_datetime(df['Event Timestamp']).dt.strftime('%Y%m%d').astype(str) + "_CAT-" + cat_im_id + "-" + (df.index + 1).astype(str)
+    )
+    new_df['Order Event'] = 'NEW'
+    new_df['MsgType'] = df['Event Type']
+    new_df['CAT_IM_ID'] = f'{cat_im_id}'
+    new_df['Date'] = pd.to_datetime(df['Event Timestamp']).dt.strftime('%Y%m%d').astype(str) + "T000000.00000000"
+    new_df['Order ID'] = ["CAT-" + cat_im_id + '-' + "OrderID-" + str(i+1) for i in range(len(df))]
+    new_df['TimeStamp'] = df['Event Timestamp']
+    new_df['Fix_Col_1'] = 'False'
+    new_df['Fix_Col_2'] = 'False'
+    new_df['Fix_Col_3'] = ''
+    new_df['Fix_Col_4'] = ''
+    new_df['Fix_Col_5'] = ''
+    new_df['Fix_Col_6'] = 'T'
+    new_df['Fix_Col_7'] = 'False'
+    new_df['Fix_Col_8'] = ''
+    new_df['SideType'] = df['Side']
+    new_df['Symbol'] = df['Symbol']
+    new_df['Price'] = df['Price']
+    new_df['Quantity'] = df['Quantity']
+    new_df['Fix_Col_9'] = ''
+    new_df['OrderType'] = np.where(df['Price'].notnull(), 'LMT', 'MKT')
+    new_df['TIF'] = "GTX=" + pd.to_datetime(df['Event Timestamp']).dt.strftime('%Y%m%d').astype(str)
+    new_df['Trading_Session'] = trading_session
+    new_df['Fix_Col_10'] = ''
+    new_df['Fix_Col_11'] = 'False'
+    new_df['FDID'] = fd_id if fd_id else ''
+    new_df['Acc Type'] = 'A'
+    new_df['Fix_Col_12'] = 'False'
+    new_df['Fix_Col_13'] = ''
+    new_df['Fix_Col_14'] = ''
+    new_df['Fix_Col_15'] = 'False'
+    new_df['Fix_Col_16'] = 'N'
+    new_df['Fix_Col_17'] = ''
+    new_df['Fix_Col_18'] = ''
+    new_df['Fix_Col_19'] = ''
+    new_df['Fix_Col_20'] = ''
+    new_df['Fix_Col_21'] = ''
+    new_df['Fix_Col_22'] = ''
+    new_df['Fix_Col_23'] = ''
+    new_df['Fix_Col_24'] = ''
+    new_df['Fix_Col_25'] = ''
+    new_df['Fix_Col_26'] = ''
+    new_df['Fix_Col_27'] = ''
+    new_df['Fix_Col_28'] = ''
+    new_df['Fix_Col_29'] = ''
+    return new_df
+
+def readCSV_MEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
+    try:
+        df = pd.read_csv(filePath)
+        df_MENO = pd.read_csv('MENO_Creation.csv')
+        last_FirmROID_MENO = df_MENO.tail(1)
+        lastID = int(last_FirmROID_MENO['FirmROID'].str.split('-').str[-1].iloc[-1])
+        fileName = filePath.split("\\")[-1]
+        
+        columns = [
+            'Order Event', 'Fix_Col_0', 'FirmROID', 'MsgType', 'CAT_IM_ID', 'Date', 'Order ID', 'Symbol',
+            'Fix_Col_1', 'TimeStamp', 'Fix_Col_2', 'Fix_Col_3', 'Fix_Col_4', 'Fix_Col_5', 'SideType', 'Price',
+            'Quantity', 'Fix_Col_6', 'OrderType', 'TIF', 'Trading_Session', 'Fix_Col_7', 'Fix_Col_8',
+            'Fix_Col_9', 'Fix_Col_10', 'Fix_Col_11', 'Fix_Col_12', 'Fix_Col_13', 'Fix_Col_14', 'Fix_Col_15',
+            'Fix_Col_16'
+        ] + ['Fix_Col_' + str(i) for i in range(17, 47)] # Handle up to 46 columns
+        
+        new_df = create_new_dataframe(columns, CAT_IM_ID, df, Trading_Session)
+        filtered_df = transform_event_type(df, 'MEOA', 'MEOR')
+        
+        new_df['MsgType'] = filtered_df['Event Type']
+        
+        try:
+            report = Reports(Report_Name='MEOR', CAT_IMID=CAT_IM_ID, FD_ID=FD_ID, Train_Session=Trading_Session,
+                             FileType='CSV', Status='Completed', FileName=fileName)
+            report.save()
+            orderEventInsertion(new_df)
+            return new_df
+        except Exception as e:
+            print("CSV to DataFrame Exception :-" + str(e))
+            return str("CSV to DataFrame Exception :- " + str(e))
+
+    except Exception as e:
+        print("Read CSV Error Exception :" + str(e))
+        return str("Read CSV Exception :- " + str(e))
+
+def readCSV_MENO(filePath, CAT_IM_ID, FD_ID, Trading_Session):
+    try:
+        df = pd.read_csv(filePath)
+        fileName = filePath.split("\\")[-1]
+        
+        columns = [
+            'Order Event', 'Fix_Col_0', 'FirmROID', 'MsgType', 'CAT_IM_ID', 'Date', 'Order ID', 'Symbol',
+            'TimeStamp', 'Fix_Col_1', 'Fix_Col_2', 'Fix_Col_3', 'Fix_Col_4', 'Fix_Col_5', 'Fix_Col_6',
+            'Fix_Col_7', 'Fix_Col_8', 'SideType', 'Price', 'Quantity', 'Fix_Col_9', 'OrderType', 'TIF',
+            'Trading_Session', 'Fix_Col_10', 'Fix_Col_11', 'FDID', 'Acc Type', 'Fix_Col_12', 'Fix_Col_13',
+            'Fix_Col_14', 'Fix_Col_15', 'Fix_Col_16', 'Fix_Col_17', 'Fix_Col_18', 'Fix_Col_19', 'Fix_Col_20',
+            'Fix_Col_21', 'Fix_Col_22', 'Fix_Col_23', 'Fix_Col_24', 'Fix_Col_25', 'Fix_Col_26', 'Fix_Col_27',
+            'Fix_Col_28', 'Fix_Col_29'
+        ] # Handle up to 36 columns
+        
+        new_df = create_new_dataframe(columns, CAT_IM_ID, df, Trading_Session, FD_ID)
+        filtered_df = transform_event_type(df, 'MEOA', 'MENO')
+        
+        new_df['MsgType'] = filtered_df['Event Type']
+        
+        try:
+            new_df.to_csv('MENO_Creation.csv', index=False)
+            report = Reports(Report_Name='MENO', CAT_IMID=CAT_IM_ID, FD_ID=FD_ID, Train_Session=Trading_Session,
+                             FileType='CSV', Status='Completed', FileName=fileName)
+            report.save()
+            orderEventInsertion(new_df)
+            return new_df
+        except Exception as e:
+            print("CSV to DataFrame Exception :-" + str(e))
+            return str("CSV to DataFrame Exception :- " + str(e))
+
+    except Exception as e:
+        print("Read CSV Error Exception :" + str(e))
+        return str("Read CSV Exception :- " + str(e))
+
+def downloadCSV(result):
+    try:
+        csv_buffer = StringIO()
+        result.to_csv(csv_buffer, index=False)
+        csv_buffer.seek(0)
+        response = HttpResponse(csv_buffer, content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="MENO_MEOR_File.csv"'
+        return response
+    except Exception as e:
+        print("Error while Downloading CSV Exception :-" + str(e))
+        return str("Error while Downloading CSV Exception :- " + str(e))
+
+def process_files(file_path, CAT_IM_ID, FD_ID, Trading_Session):
+    try:
+        result_MENO = readCSV_MENO(file_path, CAT_IM_ID, FD_ID, Trading_Session)
+        result_MEOR = readCSV_MEOR(file_path, CAT_IM_ID, FD_ID, Trading_Session)
+        result_MENO, result_MEOR = result_MENO.align(result_MEOR, join='outer', axis=1, fill_value='')
+        result = pd.concat([result_MENO, result_MEOR], axis=0, ignore_index=True)
+        return downloadCSV(result)
+    except Exception as e:
+        print("Error Exception :" + str(e))
+        return str("Error Exception :- " + str(e))
+--------------------------------------------------
+
+import pandas as pd
+import numpy as np
+from io import StringIO
+from django.http import HttpResponse
+
+def generate_firmroid(event_timestamp, cat_im_id, last_id):
+    return pd.to_datetime(event_timestamp).strftime('%Y%m%d') + "_CAT-" + cat_im_id + "-" + str(last_id)
+
+def transform_event_type(df, old_event_type, new_event_type):
+    filtered_df = df[df['Event Type'] == old_event_type]
+    if not filtered_df.empty and (filtered_df['Event Type'] == old_event_type).all():
+        filtered_df['Event Type'] = new_event_type
+    return filtered_df
+
+def create_new_dataframe(columns, cat_im_id, df, trading_session, fd_id=None):
+    new_df = pd.DataFrame(columns=columns)
+    new_df['Fix_Col_0'] = ''
+    new_df['FirmROID'] = (
+        pd.to_datetime(df['Event Timestamp']).dt.strftime('%Y%m%d').astype(str) + "_CAT-" + cat_im_id + "-" + (df.index + 1).astype(str)
+    )
+    new_df['Order Event'] = 'NEW'
+    new_df['MsgType'] = df['Event Type']
+    new_df['CAT_IM_ID'] = f'{cat_im_id}'
+    new_df['Date'] = pd.to_datetime(df['Event Timestamp']).dt.strftime('%Y%m%d').astype(str) + "T000000.00000000"
+    new_df['Order ID'] = ["CAT-" + cat_im_id + '-' + "OrderID-" + str(i+1) for i in range(len(df))]
+    new_df['TimeStamp'] = df['Event Timestamp']
+    new_df['Fix_Col_1'] = 'False'
+    new_df['Fix_Col_2'] = 'False'
+    new_df['Fix_Col_3'] = ''
+    new_df['Fix_Col_4'] = ''
+    new_df['Fix_Col_5'] = ''
+    new_df['Fix_Col_6'] = 'T'
+    new_df['Fix_Col_7'] = 'False'
+    new_df['Fix_Col_8'] = ''
+    new_df['SideType'] = df['Side']
+    new_df['Symbol'] = df['Symbol']
+    new_df['Price'] = df['Price']
+    new_df['Quantity'] = df['Quantity']
+    new_df['Fix_Col_9'] = ''
+    new_df['OrderType'] = np.where(df['Price'].notnull(), 'LMT', 'MKT')
+    new_df['TIF'] = "GTX=" + pd.to_datetime(df['Event Timestamp']).dt.strftime('%Y%m%d').astype(str)
+    new_df['Trading_Session'] = trading_session
+    new_df['Fix_Col_10'] = ''
+    new_df['Fix_Col_11'] = 'False'
+    new_df['FDID'] = fd_id if fd_id else ''
+    new_df['Acc Type'] = 'A'
+    new_df['Fix_Col_12'] = 'False'
+    new_df['Fix_Col_13'] = ''
+    new_df['Fix_Col_14'] = ''
+    new_df['Fix_Col_15'] = 'False'
+    new_df['Fix_Col_16'] = 'N'
+    new_df['Fix_Col_17'] = ''
+    new_df['Fix_Col_18'] = ''
+    new_df['Fix_Col_19'] = ''
+    new_df['Fix_Col_20'] = ''
+    new_df['Fix_Col_21'] = ''
+    new_df['Fix_Col_22'] = ''
+    new_df['Fix_Col_23'] = ''
+    new_df['Fix_Col_24'] = ''
+    new_df['Fix_Col_25'] = ''
+    new_df['Fix_Col_26'] = ''
+    new_df['Fix_Col_27'] = ''
+    new_df['Fix_Col_28'] = ''
+    new_df['Fix_Col_29'] = ''
+    return new_df
+
+def readCSV_MEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
+    try:
+        df = pd.read_csv(filePath)
+        df_MENO = pd.read_csv('MENO_Creation.csv')
+        last_FirmROID_MENO = df_MENO.tail(1)
+        lastID = int(last_FirmROID_MENO['FirmROID'].str.split('-').str[-1].iloc[-1])
+        fileName = filePath.split("\\")[-1]
+        
+        columns = [
+            'Order Event', 'Fix_Col_0', 'FirmROID', 'MsgType', 'CAT_IM_ID', 'Date', 'Order ID', 'Symbol',
+            'Fix_Col_1', 'TimeStamp', 'Fix_Col_2', 'Fix_Col_3', 'Fix_Col_4', 'Fix_Col_5', 'SideType', 'Price',
+            'Quantity', 'Fix_Col_6', 'OrderType', 'TIF', 'Trading_Session', 'Fix_Col_7', 'Fix_Col_8',
+            'Fix_Col_9', 'Fix_Col_10', 'Fix_Col_11', 'Fix_Col_12', 'Fix_Col_13', 'Fix_Col_14', 'Fix_Col_15',
+            'Fix_Col_16'
+        ] + ['Fix_Col_' + str(i) for i in range(17, 47)] # Handle up to 46 columns
+        
+        new_df = create_new_dataframe(columns, CAT_IM_ID, df, Trading_Session)
+        filtered_df = transform_event_type(df, 'MEOA', 'MEOR')
+        
+        new_df['MsgType'] = filtered_df['Event Type']
+        
+        try:
+            report = Reports(Report_Name='MEOR', CAT_IMID=CAT_IM_ID, FD_ID=FD_ID, Train_Session=Trading_Session,
+                             FileType='CSV', Status='Completed', FileName=fileName)
+            report.save()
+            orderEventInsertion(new_df)
+            return new_df
+        except Exception as e:
+            print("CSV to DataFrame Exception :-" + str(e))
+            return str("CSV to DataFrame Exception :- " + str(e))
+
+    except Exception as e:
+        print("Read CSV Error Exception :" + str(e))
+        return str("Read CSV Exception :- " + str(e))
+
+def readCSV_MENO(filePath, CAT_IM_ID, FD_ID, Trading_Session):
+    try:
+        df = pd.read_csv(filePath)
+        fileName = filePath.split("\\")[-1]
+        
+        columns = [
+            'Order Event', 'Fix_Col_0', 'FirmROID', 'MsgType', 'CAT_IM_ID', 'Date', 'Order ID', 'Symbol',
+            'TimeStamp', 'Fix_Col_1', 'Fix_Col_2', 'Fix_Col_3', 'Fix_Col_4', 'Fix_Col_5', 'Fix_Col_6',
+            'Fix_Col_7', 'Fix_Col_8', 'SideType', 'Price', 'Quantity', 'Fix_Col_9', 'OrderType', 'TIF',
+            'Trading_Session', 'Fix_Col_10', 'Fix_Col_11', 'FDID', 'Acc Type', 'Fix_Col_12', 'Fix_Col_13',
+            'Fix_Col_14', 'Fix_Col_15', 'Fix_Col_16', 'Fix_Col_17', 'Fix_Col_18', 'Fix_Col_19', 'Fix_Col_20',
+            'Fix_Col_21', 'Fix_Col_22', 'Fix_Col_23', 'Fix_Col_24', 'Fix_Col_25', 'Fix_Col_26', 'Fix_Col_27',
+            'Fix_Col_28', 'Fix_Col_29'
+        ] # Handle up to 36 columns
+        
+        new_df = create_new_dataframe(columns, CAT_IM_ID, df, Trading_Session, FD_ID)
+        filtered_df = transform_event_type(df, 'MEOA', 'MENO')
+        
+        new_df['MsgType'] = filtered_df['Event Type']
+        
+        try:
+            new_df.to_csv('MENO_Creation.csv', index=False)
+            report = Reports(Report_Name='MENO', CAT_IMID=CAT_IM_ID, FD_ID=FD_ID, Train_Session=Trading_Session,
+                             FileType='CSV', Status='Completed', FileName=fileName)
+            report.save()
+            orderEventInsertion(new_df)
+            return new_df
+        except Exception as e:
+            print("CSV to DataFrame Exception :-" + str(e))
+            return str("
