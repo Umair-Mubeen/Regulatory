@@ -15,3 +15,5 @@ try:
         json.dump(result, outfile, indent=4)
 except Exception as e:
     print("Error while merging files Json :" + str(e))
+
+Error while merging files Json :Extra data: line 2 column 1 (char 562)
