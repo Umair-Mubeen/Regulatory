@@ -3,7 +3,7 @@ import glob
 import json
 
 # Set the directory containing JSON files
-directory = "C:\\Users\\umair\\Documents\\JSON_Files"  # Ensure this directory exists and has the correct permissions
+directory = "C:\\Users\\umair\\Documents\\JsonFiles"  # Ensure this directory exists and has the correct permissions
 json_pattern = os.path.join(directory, '*.json')
 print(f"Looking for JSON files in: {json_pattern}")
 
