@@ -16,4 +16,4 @@ try:
 except Exception as e:
     print("Error while merging files Json :" + str(e))
 
-Error while merging files Json :Extra data: line 2 column 1 (char 562)
+Error parsing C:\Users\umair\Downloads\VCIN CAT APRIL\VCIN CAT APRIL\95049_VCIN_20240425_OrderEvents_000101.json\95049_VCIN_20240404_OrderEvents_000103.json: Extra data: line 2 column 1 (char 627)
