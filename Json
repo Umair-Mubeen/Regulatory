@@ -1,28 +1,4 @@
-import os
-import glob
-import json
 
-try:
-    result = []
-    directory = "C:\\Users\\umair\\Downloads\\VCIN CAT APRIL\\VCIN CAT APRIL"
-    json_pattern = os.path.join(directory, '*.json')
-    print(json_pattern)
-    for f in glob.glob(json_pattern):
-        try:
-            with open(f, "r") as infile:
-                result.append(json.load(infile))
-        except json.JSONDecodeError as jde:
-            print(f"Error parsing {f}: {jde}")
-        except Exception as e:
-            print(f"Unexpected error with file {f}: {e}")
-
-    output_file = "merged_file.json"
-    with open(output_file, "w") as outfile:
-        json.dump(result, outfile, indent=4)
-
-    print(f"Files merged successfully into {output_file}")
-except Exception as e:
-    print("Error while merging JSON files: " + str(e))
 import os
 import glob
 import json
@@ -57,3 +33,7 @@ try:
 
 except Exception as e:
     print("Error while merging JSON files: " + str(e))
+
+Json File contents
+{"actionType":"NEW","errorROEID":"","firmROEID":"20240401_VCIN_000104_400000","type":"MENO","orderKeyDate":"20240401T143934.520","orderID":"404223823","symbol":"AAPL","eventTimestamp":"20240401T143934.520","manualFlag":false,"electronicDupFlag":false,"deptType":"A","side":"SS","price":170.0200,"quantity":100,"orderType":"LMT","timeInForce":{"DAY":"20240401"},"tradingSession":"REG","custDspIntrFlag":false,"firmDesignatedID":"2458298574119445069019623959310761593132","accountHolderType":"I","affiliateFlag":false,"representativeInd":"N","solicitationFlag":false}
+{"actionType":"NEW","errorROEID":"","firmROEID":"20240401_VCIN_000104_400001","type":"MEOR","orderKeyDate":"20240401T143934.520","orderID":"404223823","symbol":"AAPL","eventTimestamp":"20240401T143934.532","manualFlag":false,"electronicDupFlag":false,"senderIMID":"126588:VCIN","destination":"151864:HBCA","destinationType":"F","routedOrderID":"STE-SHORT-622650850","session":"","side":"SS","price":170.0200,"handlingInstructions":{"RAR":true},"quantity":100,"orderType":"LMT","timeInForce":{"DAY":"20240401"},"affiliateFlag":false,"tradingSession":"REG","isoInd":"NA","dupROIDCond":false,"multiLegInd":false,"routeRejectedFlag":false}
