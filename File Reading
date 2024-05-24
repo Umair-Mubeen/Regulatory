@@ -11,4 +11,23 @@ def merge_MENO_MEOR():
 
         pass
     except Exception as e:
-        print("Merge CSV Exception :-" + str(e))
+        print("Merge CSV Exception :-" + str(e))from django.http import FileResponse
+import os
+
+def download_merged_file(request):
+    try:
+        # Call the merge function to ensure the files are merged
+        merge_MENO_MEOR()
+        
+        # Path to the merged file
+        file_path = 'EOA_To_MENO.csv'
+        
+        # Check if the file exists
+        if os.path.exists(file_path):
+            # Open the file in binary mode for reading
+            response = FileResponse(open(file_path, 'rb'), as_attachment=True, filename='EOA_To_MENO.csv')
+            return response
+        else:
+            return HttpResponse("File not found", status=404)
+    except Exception as e:
+        return HttpResponse(f"Error: {str(e)}", status=500)
