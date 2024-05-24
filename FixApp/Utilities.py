@@ -464,7 +464,8 @@ def from_EOA_to_MENO(filePath, CAT_IM_ID, FD_ID, Trading_Session):
 
         if df['Price'].eq('').all():  # check if Price has no value then replace with empty
             df.loc[df['Price'] == '', 'Price'] = ''
-        new_df['Symbol'] = df['Symbol']
+        new_df['Symbol'] = df['Symbol'].apply(lambda x: x.replace('p', 'PR') if 'p' in x else x)
+        # new_df['Symbol'] = df['Symbol']
         new_df['Price'] = df['Price']
         new_df['Quantity'] = df['Quantity']
         new_df['Fix_Col_9'] = ''
@@ -495,7 +496,7 @@ def from_EOA_to_MENO(filePath, CAT_IM_ID, FD_ID, Trading_Session):
         new_df['Fix_Col_29'] = ''
         try:
 
-            new_df.to_csv('EOA_To_MENO.csv', header=False, index=False)
+            new_df.to_csv('EOA_To_MENO.csv', index=False)
             report = Reports(Report_Name='EOA_TO_MENO', CAT_IMID=CAT_IM_ID, FD_ID=FD_ID, Train_Session=Trading_Session,
                              FileType='CSV', Status='Completed', FileName=fileName)
             report.save()
@@ -519,6 +520,7 @@ def from_EOA_to_MEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
     try:
         print("File Path", str(filePath))
         df = pd.read_csv(filePath)
+        print(df['Event Type'])
         df = df[df['Event Type'] == 'EOA']
         df_MENO = pd.read_csv("EOA_To_MENO.csv")
         last_FirmROID_MENO = df_MENO.tail(1)
@@ -526,7 +528,6 @@ def from_EOA_to_MEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
         lastID = last_FirmROID_MENO['FirmROID'].str.split('-').str[-1].iloc[-1]  # 20240515_CAT-VCVW-21# 21
         print("from_EOA_to_MEOR Last Item RowID is :- " + str(lastID))  # 41
         fileName = filePath.split("\\")[-1]
-        print("file Name is" + str(fileName))
         columns = ['Order Event', 'Fix_Col_0', 'FirmROID', 'MsgType', 'CAT_IM_ID', 'Date', 'Order ID', 'Symbol',
                    'Fix_Col_1', 'TimeStamp', 'Fix_Col_2', 'Fix_Col_3', 'Fix_Col_4', 'Sender_IM_ID',
                    'Receiver_IM_ID', 'Firm_Exchange', 'Routed_OrderID', 'Session', 'SideType', 'Price', 'Quantity',
@@ -542,7 +543,6 @@ def from_EOA_to_MEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
                     + str(int(lastID) + 1))
             lastID = int(pd.Series(new_df.loc[i, 'FirmROID']).str.split('-').str[-1])
 
-        print(new_df['FirmROID'])
         new_df['Order Event'] = 'NEW'
 
         filtered_df = df[df['Event Type'] != 'EOM']
@@ -559,7 +559,9 @@ def from_EOA_to_MEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
         for index, row in df.iterrows():
             new_df.loc[index, 'Order ID'] = "CAT-" + CAT_IM_ID + '-' + "OrderID-" + f'{counter}'
             counter += 1
-        new_df['Symbol'] = df['Symbol']
+
+        new_df['Symbol'] = df['Symbol'].apply(lambda x: x.replace('p', 'PR') if 'p' in x else x)
+        # new_df['Symbol'] = df['Symbol']
         new_df['Fix_Col_1'] = ''
         new_df['TimeStamp'] = df['Event Timestamp']
         new_df['Fix_Col_2'] = 'False'
