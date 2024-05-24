@@ -73,30 +73,31 @@ WSGI_APPLICATION = 'FixProject.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'fix',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '3306',
-
-    }
     # 'default': {
-    #     'ENGINE': 'mssql',
-    #     'NAME': 'CAT_Records',
-    #     'USER': 'sa',
-    #     'PASSWORD': 'Logicie!123',
-    #     'HOST': 'SQLEXPRESS',
-    #     'OPTIONS': {
-    #         'driver': 'ODBC Driver 17 for SQL Server',
-    #         'Trusted_Connection': 'yes',
-    #         'timeout': 60
-    #     },
-    #     'extra_params': 'PORT=1433'
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'fix',
+    #     'USER': 'root',
+    #     'PASSWORD': '',
+    #     'HOST': 'localhost',
+    #     'PORT': '3306',
     #
     # }
+    'default': {
+        'ENGINE': 'mssql',
+        'NAME': 'CAT_Records',
+        'USER': 'sa',
+        'PASSWORD': 'Logicie!123',
+        'HOST': 'GOPS-UMAIR\SQLEXPRESS',
+        'PORT': '',
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+            'Trusted_Connection': 'yes',
+
+        },
+
+    }
 }
+DATABASE_CONNECTION_POOLING = False
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

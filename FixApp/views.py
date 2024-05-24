@@ -2,9 +2,11 @@ from io import StringIO
 from django.shortcuts import render, HttpResponse, redirect, HttpResponseRedirect
 import pandas as pd
 import numpy as np
+from django.http import FileResponse
 from .models import Employee, OrderEvent, Reports
 import os
-from .Utilities import readCSV_MEOR, readCSV_MENO, generateMEOR, downloadCSV, mergeCSV
+from .Utilities import readCSV_MEOR, readCSV_MENO, generateMEOR, downloadCSV, readCSV, from_EOA_to_MENO, \
+    from_EOA_to_MEOR, merge_MENO_MEOR
 
 
 def index(request):
@@ -120,17 +122,27 @@ def OrderEvents(request):
             if not file_name.endswith('.csv'):
                 return render(request, 'OrderEvents.html',
                               {'title': 'Invalid File Type!', 'icon': 'error', 'message': 'File must be a CSV!'})
+
             result_MENO = readCSV_MENO(file_path, CAT_IM_ID, FD_ID, Trading_Session)
             generateMEOR(file_path, CAT_IM_ID, FD_ID, Trading_Session)
             result_MEOR = readCSV_MEOR(file_path, CAT_IM_ID, FD_ID, Trading_Session)
 
-            result = pd.concat([result_MENO, result_MEOR], axis=0, ignore_index=True)
-            result.to_csv("combined_result.csv", index=False)
+            # result = pd.concat([result_MENO, result_MEOR], axis=0, ignore_index=True)
+
             try:
-                return downloadCSV(result)
+                readCSV()
+                response = FileResponse(open('MENO_Creation.csv', 'rb'), as_attachment=True,
+                                        filename='From_MEOA_Merge_To_MENO_MEOR.csv')
+                return response
+
             except Exception as e:
                 print("Error Exception :" + str(e))
-                return render(request, 'OrderEvents.html', {'message': "Error Occur while reading file!"})
+                return render(request, 'OrderEvents.html', {'message': "Error Occur while Downloading file!"})
+            # try:
+            #     return downloadCSV(result)
+            # except Exception as e:
+            #     print("Error Exception :" + str(e))
+            #     return render(request, 'OrderEvents.html', {'message': "Error Occur while reading file!"})
 
         else:
             return render(request, 'OrderEvents.html', {'message': ""})
@@ -183,6 +195,66 @@ def find_ord_trails(file):
             return orders
     except Exception as e:
         print("IO Exception :" + str(e))
+
+
+def EOA(request):
+    try:
+        if 'UserName' not in request.session:
+            return render(request, 'login.html')
+
+        if request.method == 'POST':
+            CAT_IM_ID = request.POST['CAT_IM_ID']
+            FD_ID = request.POST['FD_ID']
+            Trading_Session = request.POST['Trading_Session']
+            uploaded_file = request.FILES.get('file')  # Access uploaded file through request.FILES
+            directory = 'EOA'
+
+            if not os.path.exists(directory):  # Check if the directory exists, create it if it doesn't
+                os.makedirs(directory)
+
+            if CAT_IM_ID == '' or FD_ID == '' or Trading_Session == '':
+                return render(request, 'EOA.html',
+                              {'title': 'Required !', 'icon': 'error', 'message': 'One or more fields are missing!'})
+
+            if uploaded_file.size == 0:
+                return render(request, 'EOA.html',
+                              {'title': 'Required !', 'icon': 'error', 'message': 'Uploaded File Size is Empty!'})
+
+            if not uploaded_file:
+                return render(request, 'EOA.html',
+                              {'title': 'No File Uploaded!', 'icon': 'error', 'message': 'Please upload a file!'})
+
+            file_name = uploaded_file.name
+            file_path = os.path.join(directory, uploaded_file.name)  # Define the file path where the file will be save
+            # Save the file to the desired location
+            if file_name.endswith('.csv'):
+                with open(file_path, 'wb+') as destination:
+                    for chunk in uploaded_file.chunks():
+                        destination.write(chunk)
+
+            if not file_name.endswith('.csv'):
+                return render(request, 'EOA.html',
+                              {'title': 'Invalid File Type!', 'icon': 'error', 'message': 'File must be a CSV!'})
+
+            result_MENO = from_EOA_to_MENO(file_path, CAT_IM_ID, FD_ID, Trading_Session)
+            result_MEOR = from_EOA_to_MEOR(file_path, CAT_IM_ID, FD_ID, Trading_Session)
+
+            try:
+                # return downloadCSV(result_MENO)
+                merge_MENO_MEOR()
+                response = FileResponse(open('EOA_To_MENO.csv', 'rb'), as_attachment=True,
+                                        filename='From_EOA_Merge_To_MENO_MEOR.csv')
+                return response
+
+            except Exception as e:
+                print("Error Exception :" + str(e))
+                return render(request, 'EOA.html', {'message': "Error Occur while Downloading file!"})
+
+        else:
+            return render(request, 'EOA.html', {'message': ""})
+    except Exception as e:
+        print("Error Exception :" + str(e))
+        return render(request, 'EOA.html', {'message': "File or CSV Error Exception :" + str(e)})
 
 
 def Logout(request):
