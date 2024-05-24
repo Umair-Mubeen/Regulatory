@@ -1,9 +1,9 @@
-def readCSV(MENO, MEOR):
+def merge_MENO_MEOR():
     try:
-        with open('MENO_Creation.csv', 'a', newline='') as f:
+        print("EOA_To_MENO")
+        with open('EOA_To_MENO.csv', 'a', newline='') as f:
             writer = csv.writer(f)
-
-            with open('MEOR_Creation.csv', 'r') as f:
+            with open('EOA_To_MEOR.csv', 'r') as f:
                 reader = csv.reader(f)
                 next(reader, None)
                 for row in reader:
