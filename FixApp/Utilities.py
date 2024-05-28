@@ -348,7 +348,7 @@ def orderEventInsertion(dataframe, type):
                     Fix_Col_28=row['Fix_Col_28'],
 
                 ) for _, row in dataframe.iterrows()
-            ])
+            ], ignore_conflicts=True)
         else:
 
             OrderEvent.objects.bulk_create([
@@ -388,7 +388,7 @@ def orderEventInsertion(dataframe, type):
                     Fix_Col_16=row['Fix_Col_16'],
 
                 ) for _, row in dataframe.iterrows()
-            ])
+            ], ignore_conflicts=True)
 
     except Exception as e:
         print("Bulk Insertion Exception: - " + str(e))
@@ -708,14 +708,9 @@ def EOAInsertion(dataframe, type):
                     Fix_Col_28=row['Fix_Col_28'],
 
                 ) for _, row in dataframe.iterrows()
-            ])
+            ], ignore_conflicts=True)
         else:
-            columns = ['Order Event', 'Fix_Col_0', 'FirmROID', 'MsgType', 'CAT_IM_ID', 'Date', 'Order ID', 'Symbol',
-                       'Fix_Col_1', 'TimeStamp', 'Fix_Col_2', 'Fix_Col_3', 'Fix_Col_4', 'Sender_IM_ID',
-                       'Receiver_IM_ID', 'Firm_Exchange', 'Routed_OrderID', 'Session', 'SideType', 'Price', 'Quantity',
-                       'Fix_Col_6', 'OrderType', 'TIF', 'Trading_Session', 'Fix_Col_7', 'Fix_Col_8', 'Fix_Col_9',
-                       'Fix_Col_10', 'Fix_Col_11', 'Fix_Col_12', 'Fix_Col_13', 'Fix_Col_14', 'Fix_Col_15', 'Fix_Col_16',
-                       'Fix_Col_17', 'Fix_Col_18']
+
             EOA.objects.bulk_create([
                 EOA(
                     Order_Event=row['Order Event'],
@@ -756,7 +751,7 @@ def EOAInsertion(dataframe, type):
                     Fix_Col_18='',
 
                 ) for _, row in dataframe.iterrows()
-            ])
+            ], ignore_conflicts=True)
 
     except Exception as e:
         print("Bulk Insertion Exception: - " + str(e))

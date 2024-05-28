@@ -131,23 +131,16 @@ def MEOA(request):
             result_MENO = readCSV_MENO(file_path, CAT_IM_ID, FD_ID, Trading_Session)
             generateMEOR(file_path, CAT_IM_ID, FD_ID, Trading_Session)
             result_MEOR = readCSV_MEOR(file_path, CAT_IM_ID, FD_ID, Trading_Session)
-
             # result = pd.concat([result_MENO, result_MEOR], axis=0, ignore_index=True)
-
             try:
                 readCSV()
                 response = FileResponse(open('MENO_Creation.csv', 'rb'), as_attachment=True,
                                         filename='From_MEOA_Merge_To_MENO_MEOR.csv')
                 return response
-
             except Exception as e:
                 print("Error Exception :" + str(e))
                 return render(request, 'MEOA.html', {'message': "Error Occur while Downloading file!"})
-            # try:
-            #     return downloadCSV(result)
-            # except Exception as e:
-            #     print("Error Exception :" + str(e))
-            #     return render(request, 'MEOA.html', {'message': "Error Occur while reading file!"})
+           
 
         else:
             return render(request, 'MEOA.html', {'message': ""})
