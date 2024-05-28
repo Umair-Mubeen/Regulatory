@@ -3,55 +3,57 @@ from django.shortcuts import render, HttpResponse, redirect, HttpResponseRedirec
 import pandas as pd
 import numpy as np
 from django.http import FileResponse
-from .models import Employee, OrderEvent, Reports
+from .models import Employee, OrderEvent, Reports, EOA
 import os
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.core.paginator import Paginator
 from .Utilities import readCSV_MEOR, readCSV_MENO, generateMEOR, downloadCSV, readCSV, from_EOA_to_MENO, \
     from_EOA_to_MEOR, merge_MENO_MEOR
 
 
 def index(request):
     try:
-        if 'UserName' not in request.session:
-            return render(request, 'login.html')
-        else:
+        if isLoggedIn(request):
             return redirect('Dashboard')
+        else:
+            return render(request, 'login.html')
     except Exception as e:
         return HttpResponse(str(e))
 
 
-def login(request):
+def userLogin(request):
     try:
-        if 'UserName' in request.session:
+        if isLoggedIn(request):
             return redirect('Dashboard')
 
         if request.method == 'POST':
-            user = request.POST['user']
-            pwd = request.POST['pwd']
-            employees = Employee.objects.all()
-            for emp in employees:
-                print(emp.Emp_Name == user and emp.Emp_Pwd == pwd)
-                if emp.Emp_Name == user and emp.Emp_Pwd == pwd:
-                    print("login success")
-                    if 'UserName' not in request.session:
-                        request.session['UserName'] = user
-                    return render(request, 'Dashboard.html',
-                                  {'title': 'Welcome to Dashboard !', 'icon': 'success',
-                                   'message': 'Login SuccessFully!'})
-                else:
-                    request.session['message'] = "Invalid Username or Password"
-                    return render(request, 'login.html',
-                                  {'title': 'Invalid ', 'icon': 'error', 'message': 'Invalid Username or Password!'})
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                request.session['UserName'] = username
+                return render(request, 'Dashboard.html',
+                              {'title': 'Welcome to Dashboard !', 'icon': 'success',
+                               'message': 'Login SuccessFully!'})
+
+            else:
+                return render(request, 'login.html',
+                              {'title': 'Invalid ', 'icon': 'error', 'message': 'Invalid Username or Password!'})
+
         else:
-            request.session['message'] = "Method shall be POST rather than GET !"
-            return render(request, 'login.html')
+            render(request, 'login.html',
+                   {'title': 'Invalid Method ', 'icon': 'error', 'message': 'Method shall be POST rather than GET !'})
     except Exception as e:
-        request.session['message'] = "Exception :- " + str(e)
         return render(request, 'login.html')
 
 
 def Dashboard(request):
-    if 'UserName' not in request.session:
-        return render(request, 'login.html')
+    if isLoggedIn(request) is False:
+        return redirect('/')
+
     else:
         return render(request, 'Dashboard.html')
 
@@ -89,8 +91,8 @@ def userRegistration(request):
 
 def MEOA(request):
     try:
-        if 'UserName' not in request.session:
-            return render(request, 'login.html')
+        if isLoggedIn(request) is False:
+            return redirect('/')
 
         if request.method == 'POST':
             CAT_IM_ID = request.POST['CAT_IM_ID']
@@ -154,6 +156,40 @@ def MEOA(request):
         return render(request, 'MEOA.html', {'message': "File or CSV Error Exception :" + str(e)})
 
 
+def MEOA_Details(request):
+    try:
+        if isLoggedIn(request) is False:
+            return redirect('/')
+
+        result = OrderEvent.objects.all()
+        paginator = Paginator(result, 20)
+        page = request.GET.get('page')
+        MEOA = paginator.get_page(page)
+
+        return render(request, 'MEOA_Details.html', {'item': MEOA})
+
+    except Exception as e:
+        print("Error Exception :" + str(e))
+        return render(request, 'MEOA_Details.html', {'message': "Error Exception :" + str(e)})
+
+
+def EOA_Details(request, ):
+    try:
+        if isLoggedIn(request) is False:
+            return redirect('/')
+
+        result = EOA.objects.all()
+        paginator = Paginator(result, 20)
+        page = request.GET.get('page')
+        EOA_result = paginator.get_page(page)
+
+        return render(request, 'EOA_Details.html', {'item': EOA_result})
+
+    except Exception as e:
+        print("Error Exception :" + str(e))
+        return render(request, 'MEOA_Details.html', {'message': "Error Exception :" + str(e)})
+
+
 def OrderTrails(request):
     try:
         if 'UserName' not in request.session:
@@ -200,10 +236,10 @@ def find_ord_trails(file):
         print("IO Exception :" + str(e))
 
 
-def EOA(request):
+def EOA_Form(request):
     try:
-        if 'UserName' not in request.session:
-            return render(request, 'login.html')
+        if isLoggedIn(request) is False:
+            return redirect('/')
 
         if request.method == 'POST':
             CAT_IM_ID = request.POST['CAT_IM_ID']
@@ -261,8 +297,13 @@ def EOA(request):
 
 
 def Logout(request):
-    if 'UserName' not in request.session:
-        return HttpResponseRedirect('/')
+    logout(request)
+    return redirect('/')
 
-    del request.session['UserName']
-    return HttpResponseRedirect('Dashboard')
+
+def isLoggedIn(request):
+    if 'UserName' not in request.session:
+        return False
+    else:
+        print("True Logged In")
+        return True

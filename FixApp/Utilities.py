@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from django.http import request
 from django.shortcuts import HttpResponse, render
-from .models import Employee, OrderEvent, Reports
+from .models import Employee, OrderEvent, Reports, EOA
 import os
 
 
@@ -60,7 +60,7 @@ def readCSV_MEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
         if df['Price'].eq('').all():  # check if Price has no value then replace with empty
             df.loc[df['Price'] == '', 'Price'] = ''
         # new_df['Price'] = df['Price']
-        new_df['Quantity'] = df['Price']
+        new_df['Quantity'] = df['Quantity']
 
         # new_df['Quantity'] = df['Quantity']
         new_df['Fix_Col_6'] = df['Receiver IMID']
@@ -505,7 +505,7 @@ def from_EOA_to_MENO(filePath, CAT_IM_ID, FD_ID, Trading_Session):
             # except Exception as e:
             #     print("Error Occur while Downloading file EOA_TO_MENO ! :" + str(e))
             #     return render(request, 'EOA.html', {'message': "Error Occur while Downloading file EOA_TO_MENO !"})
-
+            EOAInsertion(new_df, 'MENO')
             return new_df
         except Exception as e:
             print("CSV to DataFrame Exception :-" + str(e))
@@ -624,7 +624,7 @@ def from_EOA_to_MEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
                              FileType='CSV', Status='Completed', FileName=fileName)
             report.save()
             new_df.to_csv('EOA_To_MEOR.csv', header=False, index=False)
-            orderEventInsertion(new_df, 'MEOR')
+            EOAInsertion(new_df, 'MEOR')
             # try:
             #     return downloadCSV(new_df, 'EOA_To_MEOR.csv')
             # except Exception as e:
@@ -654,3 +654,110 @@ def merge_MENO_MEOR():
         pass
     except Exception as e:
         print("Merge CSV Exception :-" + str(e))
+
+
+def EOAInsertion(dataframe, type):
+    try:
+        if type == 'MENO':
+            EOA.objects.bulk_create([
+                EOA(
+                    Order_Event=row['Order Event'],
+                    Fix_Col_0=row['Fix_Col_0'],
+                    FirmROID=row['FirmROID'],
+                    MsgType=row['MsgType'],
+                    CAT_IM_ID=row['CAT_IM_ID'],
+                    Date=row['Date'],
+                    Order_ID=row['Order ID'],
+                    Symbol=row['Symbol'],
+                    TimeStamp=row['TimeStamp'],
+                    Fix_Col_1=row['Fix_Col_1'],
+                    Fix_Col_2=row['Fix_Col_2'],
+                    Fix_Col_3=row['Fix_Col_3'],
+                    Fix_Col_4=row['Fix_Col_4'],
+                    Fix_Col_5=row['Fix_Col_5'],
+                    Fix_Col_6=row['Fix_Col_6'],
+                    Fix_Col_7=row['Fix_Col_7'],
+                    Fix_Col_8=row['Fix_Col_8'],
+                    SideType=row['SideType'],
+                    Price=row['Price'],
+                    Quantity=row['Quantity'],
+                    Fix_Col_9=row['Fix_Col_9'],
+                    OrderType=row['OrderType'],
+                    TIF=row['TIF'],
+                    Trading_Session=row['Trading_Session'],
+                    Fix_Col_10=row['Fix_Col_10'],
+                    Fix_Col_11=row['Fix_Col_11'],
+                    FD_ID=row['FDID'],
+                    Acc_Type=row['Acc Type'],
+                    Fix_Col_12=row['Fix_Col_12'],
+                    Fix_Col_13=row['Fix_Col_13'],
+                    Fix_Col_14=row['Fix_Col_14'],
+                    Fix_Col_15=row['Fix_Col_15'],
+                    Fix_Col_16=row['Fix_Col_16'],
+                    Fix_Col_17=row['Fix_Col_17'],
+                    Fix_Col_18=row['Fix_Col_18'],
+                    Fix_Col_19=row['Fix_Col_19'],
+                    Fix_Col_20=row['Fix_Col_20'],
+                    Fix_Col_21=row['Fix_Col_21'],
+                    Fix_Col_22=row['Fix_Col_22'],
+                    Fix_Col_23=row['Fix_Col_23'],
+                    Fix_Col_24=row['Fix_Col_24'],
+                    Fix_Col_25=row['Fix_Col_25'],
+                    Fix_Col_26=row['Fix_Col_26'],
+                    Fix_Col_27=row['Fix_Col_27'],
+                    Fix_Col_28=row['Fix_Col_28'],
+
+                ) for _, row in dataframe.iterrows()
+            ])
+        else:
+            columns = ['Order Event', 'Fix_Col_0', 'FirmROID', 'MsgType', 'CAT_IM_ID', 'Date', 'Order ID', 'Symbol',
+                       'Fix_Col_1', 'TimeStamp', 'Fix_Col_2', 'Fix_Col_3', 'Fix_Col_4', 'Sender_IM_ID',
+                       'Receiver_IM_ID', 'Firm_Exchange', 'Routed_OrderID', 'Session', 'SideType', 'Price', 'Quantity',
+                       'Fix_Col_6', 'OrderType', 'TIF', 'Trading_Session', 'Fix_Col_7', 'Fix_Col_8', 'Fix_Col_9',
+                       'Fix_Col_10', 'Fix_Col_11', 'Fix_Col_12', 'Fix_Col_13', 'Fix_Col_14', 'Fix_Col_15', 'Fix_Col_16',
+                       'Fix_Col_17', 'Fix_Col_18']
+            EOA.objects.bulk_create([
+                EOA(
+                    Order_Event=row['Order Event'],
+                    Fix_Col_0=row['Fix_Col_0'],
+                    FirmROID=row['FirmROID'],
+                    MsgType=row['MsgType'],
+                    CAT_IM_ID=row['CAT_IM_ID'],
+                    Date=row['Date'],
+                    Order_ID=row['Order ID'],
+                    Symbol=row['Symbol'],
+                    TimeStamp=row['TimeStamp'],
+                    Fix_Col_1=row['Fix_Col_1'],
+                    Fix_Col_2=row['Fix_Col_2'],
+                    Fix_Col_3=row['Fix_Col_3'],
+                    Fix_Col_4=row['Fix_Col_4'],
+                    Fix_Col_5=row['Sender_IM_ID'],
+                    Fix_Col_6=row['Receiver_IM_ID'],
+                    Fix_Col_7=row['Firm_Exchange'],
+                    Fix_Col_8=row['Routed_OrderID'],
+
+                    SideType=row['Session'],
+                    Price=row['SideType'],
+                    Quantity=row['Price'],
+                    Fix_Col_9=row['Quantity'],
+                    OrderType='',
+                    TIF=row['OrderType'],
+                    Trading_Session=row['TIF'],
+                    Fix_Col_10=row['Trading_Session'],
+                    Fix_Col_11='False',
+                    FD_ID='NA',
+                    Acc_Type='',
+                    Fix_Col_12='False',
+                    Fix_Col_13='False',
+                    Fix_Col_14='',
+                    Fix_Col_15='False',
+                    Fix_Col_16='',
+                    Fix_Col_17='',
+                    Fix_Col_18='',
+
+                ) for _, row in dataframe.iterrows()
+            ])
+
+    except Exception as e:
+        print("Bulk Insertion Exception: - " + str(e))
+        return str("Bulk Insertion Exception: - " + str(e))

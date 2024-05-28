@@ -1,0 +1,239 @@
+{% load static %}
+{% include 'reusable.html' %}
+<title>Logiciel - MEOR Details </title>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+    <!-- Navbar -->
+    {% include 'navbar.html' %}
+    <!-- /.navbar -->
+
+    {% include 'sidebar.html' %}
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1 class="m-0">Logiciel - Dashboard</h1>
+                    </div><!-- /.col -->
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="/Dashboard" style="color:black"><i
+                                    class="fa fa-home"></i></a>
+                            </li>
+                            <li class="breadcrumb-item">EOA's Details</li>
+
+                        </ol>
+                    </div><!-- /.col -->
+                </div><!-- /.row -->
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- /.content-header -->
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="container-fluid">
+               
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">From EOA To MENO and MEOR Details</h3>
+
+                                        <div class="card-tools">
+                                            <div class="input-group input-group-sm" style="width: 150px;">
+                                                <input type="text" name="table_search" class="form-control float-right"
+                                                       placeholder="Search">
+
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-default">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- /.card-header -->
+                                    <div class="card-body table-responsive p-0">
+                                        <table class="table table-head-fixed text-nowrap">
+                                            <thead>
+                                            <tr>
+                                                <th>S#</th>
+                                                <th>Order Event</th>
+                                                <th>Fix Col 0</th>
+                                                <th>Firm ROID</th>
+                                                <th>Msg Type</th>
+                                                <th>CAT IM ID</th>
+                                                <th>Date</th>
+                                                <th>Order ID</th>
+                                                <th>Symbol</th>
+                                                <th>Time Stamp</th>
+                                                <th>Fix Col 1</th>
+                                                <th>Fix Col 2</th>
+                                                <th>Fix Col 3</th>
+                                                <th>Fix Col 4</th>
+                                                <th>Fix Col 5</th>
+                                                <th>Fix Col 6</th>
+                                                <th>Fix Col 7</th>
+                                                <th>Fix Col 8</th>
+                                                <th>Side Type</th>
+                                                <th>Price</th>
+                                                <th>Quantity</th>
+                                                <th>Fix Col 9</th>
+                                                <th>Order Type</th>
+                                                <th>TIF</th>
+                                                <th>Trading Session</th>
+                                                <th>Fix Col 10</th>
+                                                <th>Fix Col 11</th>
+                                                <th>FD ID</th>
+                                                <th>Acc Type</th>
+                                                <th>Fix Col 12</th>
+                                                <th>Fix Col 13</th>
+                                                <th>Fix Col 14</th>
+                                                <th>Fix Col 15</th>
+                                                <th>Fix Col 16</th>
+                                                {#                                                <th>Fix Col 17</th>#}
+                                                {#                                                <th>Fix Col 18</th>#}
+                                                {#                                                <th>Fix Col 19</th>#}
+                                                {#                                                <th>Fix Col 20</th>#}
+                                                {#                                                <th>Fix Col 21</th>#}
+                                                {#                                                <th>Fix Col 22</th>#}
+                                                {#                                                <th>Fix Col 23</th>#}
+                                                {#                                                <th>Fix Col 24</th>#}
+                                                {#                                                <th>Fix Col 25</th>#}
+                                                {#                                                <th>Fix Col 26</th>#}
+                                                {#                                                <th>Fix Col 27</th>#}
+                                                {#                                                <th>Fix Col 28</th>#}
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for obj in item %}
+                                                <tr>
+
+                                                    <td> {{ obj.id }}</td>
+                                                    <td>{{ obj.Order_Event }}</td>
+                                                    <td>{{ obj.Fix_Col_0 }}</td>
+                                                    <td>{{ obj.FirmROID }}</td>
+                                                    <td>{{ obj.MsgType }}</td>
+                                                    <td>{{ obj.CAT_IM_ID }}</td>
+                                                    <td>{{ obj.Date }}</td>
+                                                    <td>{{ obj.Order_ID }}</td>
+                                                    <td>{{ obj.Symbol }}</td>
+                                                    <td>{{ obj.TimeStamp }}</td>
+                                                    <td>{{ obj.Fix_Col_1 }}</td>
+                                                    <td>{{ obj.Fix_Col_2 }}</td>
+                                                    <td>{{ obj.Fix_Col_3 }}</td>
+                                                    <td>{{ obj.Fix_Col_4 }}</td>
+                                                    <td>{{ obj.Fix_Col_5 }}</td>
+                                                    <td>{{ obj.Fix_Col_6 }}</td>
+                                                    <td>{{ obj.Fix_Col_7 }}</td>
+                                                    <td>{{ obj.Fix_Col_8 }}</td>
+                                                    <td>{{ obj.SideType }}</td>
+                                                    <td>{{ obj.Price }}</td>
+                                                    <td>{{ obj.Quantity }}</td>
+                                                    <td>{{ obj.Fix_Col_9 }}</td>
+                                                    <td>{{ obj.OrderType }}</td>
+                                                    <td>{{ obj.TIF }}</td>
+                                                    <td>{{ obj.Trading_Session }}</td>
+                                                    <td>{{ obj.Fix_Col_10 }}</td>
+                                                    <td>{{ obj.Fix_Col_11 }}</td>
+                                                    <td>{{ obj.FD_ID }}</td>
+                                                    <td>{{ obj.Acc_Type }}</td>
+                                                    <td>{{ obj.Fix_Col_12 }}</td>
+                                                    <td>{{ obj.Fix_Col_13 }}</td>
+                                                    <td>{{ obj.Fix_Col_14 }}</td>
+                                                    <td>{{ obj.Fix_Col_15 }}</td>
+                                                    <td>{{ obj.Fix_Col_16 }}</td>
+                                                    {#                                                    <td>{{ obj.Fix_Col_17 }}</td>#}
+                                                    {#                                                    <td>{{ obj.Fix_Col_18 }}</td>#}
+                                                    {#                                                    <td>{{ obj.Fix_Col_19 }}</td>#}
+                                                    {#                                                    <td>{{ obj.Fix_Col_20 }}</td>#}
+                                                    {#                                                    <td>{{ obj.Fix_Col_21 }}</td>#}
+                                                    {#                                                    <td>{{ obj.Fix_Col_22 }}</td>#}
+                                                    {#                                                    <td>{{ obj.Fix_Col_23 }}</td>#}
+                                                    {#                                                    <td>{{ obj.Fix_Col_24 }}</td>#}
+                                                    {#                                                    <td>{{ obj.Fix_Col_25 }}</td>#}
+                                                    {#                                                    <td>{{ obj.Fix_Col_26 }}</td>#}
+                                                    {#                                                    <td>{{ obj.Fix_Col_27 }}</td>#}
+                                                    {#                                                    <td>{{ obj.Fix_Col_28 }}</td>#}
+                                                </tr>
+                                            {% endfor %}
+
+                                            </tbody>
+
+                                        </table>
+
+                                    </div>
+                                    <!-- /.card-body -->
+
+                                </div>
+                                <!-- /.card -->
+                                <ul class="pagination float-right">
+                                    {% if item.has_previous %}
+                                        <li class="paginate_button page-item previous">
+                                            <a href="?page={{ item.previous_page_number }}"
+                                               aria-controls="example2" data-dt-idx="0" tabindex="0"
+                                               class="page-link">Previous</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="paginate_button page-item previous disabled"
+                                            id="example2_previous">
+                                            <a href="#" aria-controls="example2" data-dt-idx="0" tabindex="0"
+                                               class="page-link">Previous</a>
+                                        </li>
+                                    {% endif %}
+
+                                    {% for page in item.paginator.page_range %}
+                                        {% if page == item.number %}
+                                            <li class="paginate_button page-item active">
+                                                <a href="#" aria-controls="example2" data-dt-idx="{{ page }}"
+                                                   tabindex="0" class="page-link">{{ page }}</a>
+                                            </li>
+                                        {% else %}
+                                            <li class="paginate_button page-item">
+                                                <a href="?page={{ page }}" aria-controls="example2"
+                                                   data-dt-idx="{{ page }}" tabindex="0"
+                                                   class="page-link">{{ page }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if item.has_next %}
+                                        <li class="paginate_button page-item next">
+                                            <a href="?page={{ item.next_page_number }}" aria-controls="example2"
+                                               data-dt-idx="{{ item.next_page_number }}" tabindex="0"
+                                               class="page-link">Next</a>
+                                        </li>
+                                        {#                                    {% else %}#}
+                                        {#                                        <li class="paginate_button page-item next disabled" id="example2_next">#}
+                                        {#                                            <a href="#" aria-controls="example2"#}
+                                        {#                                               data-dt-idx="{{ item.next_page_number }}" tabindex="0"#}
+                                        {#                                               class="page-link">Next</a>#}
+                                        {#                                        </li>#}
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+
+    {% include 'footer.html' %}
+
+
+</div>
+</body>
