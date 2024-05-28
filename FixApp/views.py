@@ -27,17 +27,20 @@ def login(request):
         if request.method == 'POST':
             user = request.POST['user']
             pwd = request.POST['pwd']
-            Emp = Employee.objects.filter(Emp_Name=user, Emp_Pwd=pwd).exists()
-            if Emp:
-                print("login success")
-                if 'UserName' not in request.session:
-                    request.session['UserName'] = user
-                return render(request, 'Dashboard.html',
-                              {'title': 'Welcome to Dashboard !', 'icon': 'success', 'message': 'Login SuccessFully!'})
-            else:
-                request.session['message'] = "Invalid Username or Password"
-                return render(request, 'login.html',
-                              {'title': 'Invalid ', 'icon': 'error', 'message': 'Invalid Username or Password!'})
+            employees = Employee.objects.all()
+            for emp in employees:
+                print(emp.Emp_Name == user and emp.Emp_Pwd == pwd)
+                if emp.Emp_Name == user and emp.Emp_Pwd == pwd:
+                    print("login success")
+                    if 'UserName' not in request.session:
+                        request.session['UserName'] = user
+                    return render(request, 'Dashboard.html',
+                                  {'title': 'Welcome to Dashboard !', 'icon': 'success',
+                                   'message': 'Login SuccessFully!'})
+                else:
+                    request.session['message'] = "Invalid Username or Password"
+                    return render(request, 'login.html',
+                                  {'title': 'Invalid ', 'icon': 'error', 'message': 'Invalid Username or Password!'})
         else:
             request.session['message'] = "Method shall be POST rather than GET !"
             return render(request, 'login.html')
@@ -84,7 +87,7 @@ def userRegistration(request):
         return HttpResponse("Internal Server Error", status=500)
 
 
-def OrderEvents(request):
+def MEOA(request):
     try:
         if 'UserName' not in request.session:
             return render(request, 'login.html')
@@ -120,7 +123,7 @@ def OrderEvents(request):
                         destination.write(chunk)
 
             if not file_name.endswith('.csv'):
-                return render(request, 'OrderEvents.html',
+                return render(request, 'MEOA.html',
                               {'title': 'Invalid File Type!', 'icon': 'error', 'message': 'File must be a CSV!'})
 
             result_MENO = readCSV_MENO(file_path, CAT_IM_ID, FD_ID, Trading_Session)
@@ -137,18 +140,18 @@ def OrderEvents(request):
 
             except Exception as e:
                 print("Error Exception :" + str(e))
-                return render(request, 'OrderEvents.html', {'message': "Error Occur while Downloading file!"})
+                return render(request, 'MEOA.html', {'message': "Error Occur while Downloading file!"})
             # try:
             #     return downloadCSV(result)
             # except Exception as e:
             #     print("Error Exception :" + str(e))
-            #     return render(request, 'OrderEvents.html', {'message': "Error Occur while reading file!"})
+            #     return render(request, 'MEOA.html', {'message': "Error Occur while reading file!"})
 
         else:
-            return render(request, 'OrderEvents.html', {'message': ""})
+            return render(request, 'MEOA.html', {'message': ""})
     except Exception as e:
         print("Error Exception :" + str(e))
-        return render(request, 'OrderEvents.html', {'message': "File or CSV Error Exception :" + str(e)})
+        return render(request, 'MEOA.html', {'message': "File or CSV Error Exception :" + str(e)})
 
 
 def OrderTrails(request):

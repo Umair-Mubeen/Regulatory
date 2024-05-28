@@ -24,7 +24,10 @@
                             <li class="breadcrumb-item"><a href="/Dashboard" style="color:black"><i
                                     class="fa fa-home"></i></a>
                             </li>
-                            <li class="breadcrumb-item active">Order Events</li>
+                            <li class="breadcrumb-item">MEOA</li>
+                            <li class="breadcrumb-item active">MENO</li>
+                            <li class="breadcrumb-item active">MEOR</li>
+
                         </ol>
                     </div><!-- /.col -->
                 </div><!-- /.row -->
@@ -37,11 +40,11 @@
             <div class="container-fluid">
                 <div class="card card-primary">
                     <div class="card-header">
-                        <h3 class="card-title">Order Events</h3>
+                        <h3 class="card-title">MEOA</h3>
                     </div>
                     <!-- /.card-header -->
                     <!-- form start -->
-                    <form method="post" action="/OrderEvents" enctype="multipart/form-data">
+                    <form method="post" action="/MEOA" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="card-body">
                             <div class="form-group">
@@ -58,7 +61,7 @@
                                 <input type="text" class="form-control" placeholder="Enter Trading Session "
                                        name="Trading_Session"/>
                             </div>
-                         
+
                             <div class="form-group">
                                 <label for="exampleInputFile">Import File</label>
                                 <div class="input-group">

@@ -11,6 +11,6 @@ urlpatterns = [
     path('Logout', views.Logout, name='Logout'),
     path('Logs', views.Logs, name='Logs'),
     path('registration', views.userRegistration, name='registration'),
-    path('OrderEvents', views.OrderEvents, name='OrderEvents'),
+    path('MEOA', views.MEOA, name='MEOA'),
     path('EOA', views.EOA, name='EOA'),
 ]
