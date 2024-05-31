@@ -16,4 +16,6 @@ urlpatterns = [
     path('EOA', views.EOA_Form, name='EOA_Form'),
     path('EOA-Details', views.EOA_Details, name='EOA_Details'),
     path('FixParser', views.FixParser, name='FixParser'),
+    path('Fix-Parse-Details', views.FixParserDetails, name='Fix-Parse-Details'),
+    path('grid-system', views.gridSystem, name='gridSystem'),
 ]

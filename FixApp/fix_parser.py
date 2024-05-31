@@ -1,6 +1,7 @@
 import argparse
 import sys
 import xml.etree.ElementTree as ET
+from .Utilities import Fix_tags_bulk_insertion
 
 
 def main():
@@ -56,7 +57,7 @@ class FIXParser:
             print("msg_separator...............")
             self.msg_separator = ""
             for i in range(self.msg_separator_length):
-                self.msg_separator += "."  # after executing the fix parse it will print the . on the same row
+                pass  # self.msg_separator += ""  # after executing the fix parse it will print the . on the same row
             self.msg_separator += "\n"
         except Exception as e:
             print("build_msg_separator Exception :- " + str(e))
@@ -99,6 +100,7 @@ class FIXParser:
 
     def make_readable(self, tags, output_file):
         try:
+            parseTagList = []
             print("enter into make_readable................")
             output_file.write(self.row_separator)
             for tag in tags:
@@ -126,8 +128,15 @@ class FIXParser:
                 enums = self.get_enum_str(tag_number, tag_value)
 
                 line = tag_number + padding1 + " | " + tag_name + padding2 + " | " + tag_value + enums + "\n"  # write data into file
+                parseLogList = {"tag_number": int(tag_number), "tag_name": tag_name, "tag_value": tag_value,
+                                "enums": enums}
+                parseTagList.append(parseLogList)
                 output_file.write(line)
                 output_file.write(self.row_separator)
+
+            Fix_tags_bulk_insertion(parseTagList)
+
+            # print(parseTagList)
         except Exception as e:
             print("tag number {} readable Exception :- ".format(tag_number) + str(e))
 

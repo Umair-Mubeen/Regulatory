@@ -3,7 +3,7 @@ from django.shortcuts import render, HttpResponse, redirect, HttpResponseRedirec
 import pandas as pd
 import numpy as np
 from django.http import FileResponse
-from .models import Employee, OrderEvent, Reports, EOA
+from .models import Employee, OrderEvent, Reports, EOA, FixTags
 import os
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -209,6 +209,26 @@ def FixParser(request):
     except Exception as e:
         print("Error Exception :" + str(e))
         return render(request, 'FixParser.html', {'message': "Error Exception :" + str(e)})
+
+
+def FixParserDetails(request):
+    try:
+        if isLoggedIn(request) is False:
+            return redirect('/')
+
+        result = FixTags.objects.all()
+        paginator = Paginator(result, 30)
+        page = request.GET.get('page')
+        tags_result = paginator.get_page(page)
+
+        return render(request, 'FixTags.html', {'item': tags_result})
+    except Exception as e:
+        print("Error Exception :" + str(e))
+        return render(request, 'FixParser.html', {'message': "Error Exception :" + str(e)})
+
+
+def gridSystem(request):
+    return render(request, 'layout.html')
 
 
 def OrderTrails(request):

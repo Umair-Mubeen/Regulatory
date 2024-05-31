@@ -124,3 +124,10 @@ class EOA(models.Model):
     Fix_Col_26 = models.CharField(max_length=50)
     Fix_Col_27 = models.CharField(max_length=50)
     Fix_Col_28 = models.CharField(max_length=50)
+
+
+class FixTags(models.Model):
+    tag = models.CharField(max_length=50)
+    value = models.CharField(max_length=50)
+    tag_name = models.CharField(max_length=50)
+    tag_desc = models.CharField(max_length=1000)

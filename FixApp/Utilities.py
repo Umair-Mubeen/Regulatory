@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from django.http import request
 from django.shortcuts import HttpResponse, render
-from .models import Employee, OrderEvent, Reports, EOA
+from .models import Employee, OrderEvent, Reports, EOA, FixTags
 import os
 
 
@@ -756,3 +756,14 @@ def EOAInsertion(dataframe, type):
     except Exception as e:
         print("Bulk Insertion Exception: - " + str(e))
         return str("Bulk Insertion Exception: - " + str(e))
+
+
+def Fix_tags_bulk_insertion(tags):
+    try:
+        print("Fix_tags_bulk_insertion...........")
+        print(tags)
+        FixTags.objects.bulk_create([
+            FixTags(tag=tag['tag_number'], value=tag['tag_value'], tag_name=tag['tag_name'], tag_desc='')
+            for tag in tags])
+    except Exception as e:
+        print("Bulk Insertion Exception: - " + str(e))
