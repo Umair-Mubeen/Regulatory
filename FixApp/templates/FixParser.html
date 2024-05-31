@@ -1,6 +1,6 @@
 {% load static %}
 {% include 'reusable.html' %}
-<title>Logiciel - EOA</title>
+<title>Logiciel - Fix Parser </title>
 
 <body class="sidebar-mini layout-fixed sidebar-collapse">
 <div class="wrapper">
@@ -24,9 +24,9 @@
                             <li class="breadcrumb-item"><a href="/Dashboard" style="color:black"><i
                                     class="fa fa-home"></i></a>
                             </li>
-                            <li class="breadcrumb-item">EOA</li>
-                            <li class="breadcrumb-item active">MENO</li>
-                            <li class="breadcrumb-item active">MEOR</li>
+                            <li class="breadcrumb-item">Fix</li>
+                            <li class="breadcrumb-item active">Parser</li>
+
                         </ol>
                     </div><!-- /.col -->
                 </div><!-- /.row -->
@@ -39,49 +39,27 @@
             <div class="container-fluid">
                 <div class="card card-info">
                     <div class="card-header">
-                        <h3 class="card-title">EOA</h3>
+                        <h3 class="card-title">Fix Parser Form</h3>
                     </div>
                     <!-- /.card-header -->
                     <!-- form start -->
-                    <form method="post" action="/EOA" enctype="multipart/form-data">
+                    <form method="post" action="/FixParser" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="card-body">
                             <div class="form-group">
-                                <label for="">Enter CAT IMID</label>
-                                <input type="text" class="form-control" placeholder="Enter CAT IM ID "
-                                       name="CAT_IM_ID"/>
-                            </div>
-                            <div class="form-group">
-                                <label for="">Enter FDID</label>
-                                <input type="text" class="form-control" placeholder="Enter FD ID " name="FD_ID"/>
-                            </div>
-                            <div class="form-group">
-                                <label for="">Enter Training Session</label>
-                                <input type="text" class="form-control" placeholder="Enter Trading Session "
-                                       name="Trading_Session"/>
+                                <textarea rows="20" cols="300" class="form-control" name="FixLogs" required></textarea>
                             </div>
 
-                            <div class="form-group">
-                                <label for="exampleInputFile">Import File</label>
-                                <div class="input-group">
-                                    <div class="custom-file">
-                                        <input type="file" class="custom-file-input" id="file-input" name="file"
-                                               onchange="checkFileSelected()">
-
-                                        <label class="custom-file-label" for="exampleInputFile">Choose file</label>
-                                    </div>
-
-                                </div>
-                            </div>
 
                         </div>
                         <!-- /.card-body -->
 
                         <div class="card-footer">
-                            <button type="submit" class="btn btn-primary" id="submit" disabled>Submit</button>
+                            <button type="submit" class="btn btn-info" id="submit">Submit</button>
                         </div>
                     </form>
                 </div>
+
                 <div class="row p-2">
 
                     {% if message %}
@@ -107,13 +85,3 @@
 
 </div>
 </body>
-
-<script>
-    function checkFileSelected() {
-        const fileInput = document.getElementById('file-input');
-        const submitButton = document.getElementById('submit');
-
-        // Enable the submit button if a file is selected, otherwise disable it
-        submitButton.disabled = !fileInput.files.length;
-    }
-</script>

@@ -12,6 +12,8 @@ from django.core.paginator import Paginator
 from .Utilities import readCSV_MEOR, readCSV_MENO, generateMEOR, downloadCSV, readCSV, from_EOA_to_MENO, \
     from_EOA_to_MEOR, merge_MENO_MEOR
 
+from .fix_parser import FIXParser, main
+
 
 def index(request):
     try:
@@ -35,6 +37,7 @@ def userLogin(request):
             if user is not None:
                 login(request, user)
                 request.session['UserName'] = username
+                request.session.save()
                 return render(request, 'Dashboard.html',
                               {'title': 'Welcome to Dashboard !', 'icon': 'success',
                                'message': 'Login SuccessFully!'})
@@ -140,7 +143,7 @@ def MEOA(request):
             except Exception as e:
                 print("Error Exception :" + str(e))
                 return render(request, 'MEOA.html', {'message': "Error Occur while Downloading file!"})
-           
+
 
         else:
             return render(request, 'MEOA.html', {'message': ""})
@@ -181,6 +184,31 @@ def EOA_Details(request, ):
     except Exception as e:
         print("Error Exception :" + str(e))
         return render(request, 'MEOA_Details.html', {'message': "Error Exception :" + str(e)})
+
+
+def FixParser(request):
+    try:
+        if isLoggedIn(request) is False:
+            return redirect('/')
+
+        if request.method == 'POST':
+            fix_message = request.POST['FixLogs']
+            fileName = "Fix_Messages.txt"
+            with open(fileName, "w", newline='') as file:
+                file.write(fix_message + "\n")
+
+            try:
+                main()
+
+            except Exception as e:
+                print("Fix Parsing Error Exception :" + str(e))
+                return render(request, 'FixParser.html', {'message': "Error Exception :" + str(e)})
+
+        return render(request, 'FixParser.html')
+
+    except Exception as e:
+        print("Error Exception :" + str(e))
+        return render(request, 'FixParser.html', {'message': "Error Exception :" + str(e)})
 
 
 def OrderTrails(request):
@@ -295,8 +323,11 @@ def Logout(request):
 
 
 def isLoggedIn(request):
-    if 'UserName' not in request.session:
-        return False
-    else:
+    if request.user.is_authenticated:
         print("True Logged In")
         return True
+        # if 'UserName' not in request.session:
+        #     return False
+    else:
+        print("False Logged In")
+        return False

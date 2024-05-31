@@ -15,4 +15,5 @@ urlpatterns = [
     path('MEOA-Details', views.MEOA_Details, name='MEOA_Details'),
     path('EOA', views.EOA_Form, name='EOA_Form'),
     path('EOA-Details', views.EOA_Details, name='EOA_Details'),
+    path('FixParser', views.FixParser, name='FixParser'),
 ]
