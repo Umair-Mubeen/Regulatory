@@ -64,14 +64,15 @@
                                         </div>
                                     </div>
                                     <!-- /.card-header -->
-                                    <div class="card-body table-responsive p-0">
+                                    <div class="card-body table-responsive p-0" style="height: 400px;">
                                         <table class="table table-head-fixed text-nowrap table-striped">
                                             <thead>
                                             <tr>
                                                 <th>S#</th>
                                                 <th>Fix Tag</th>
-                                                <th>Tag Value</th>
                                                 <th>Tag Name</th>
+                                                <th>Tag Value</th>
+                                     
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -79,8 +80,9 @@
                                                 <tr>
                                                     <td> {{ obj.id }}</td>
                                                     <td> {{ obj.tag }}</td>
-                                                    <td>{{ obj.value }}</td>
                                                     <td>{{ obj.tag_name }}</td>
+                                                    <td>{{ obj.value }}</td>
+                                     
                                                 </tr>
                                             {% endfor %}
 
