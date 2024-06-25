@@ -152,6 +152,26 @@ def MEOA(request):
         return render(request, 'MEOA.html', {'message': "File or CSV Error Exception :" + str(e)})
 
 
+def downloadEOA(request):
+    try:
+        response = FileResponse(open('FixApp//EOA.csv', 'rb'), as_attachment=True,
+                                filename='EOA.csv')
+        return response
+    except Exception as e:
+        print(str(e))
+        return render(request, 'EOA.html', {'message': "File or CSV Error Exception :" + str(e)})
+
+
+def downloadMEOA(request):
+    try:
+        response = FileResponse(open('FixApp//MEOA.csv', 'rb'), as_attachment=True,
+                                filename='MEOA.csv')
+        return response
+    except Exception as e:
+        print(str(e))
+        return render(request, 'MEOA.html', {'message': "File or CSV Error Exception :" + str(e)})
+
+
 def MEOA_Details(request):
     try:
         if isLoggedIn(request) is False:
@@ -322,7 +342,7 @@ def EOA_Form(request):
             try:
                 # return downloadCSV(result_MENO)
                 merge_MENO_MEOR()
-                response = FileResponse(open('EOA_To_MENO.csv', 'rb'), as_attachment=True,
+                response = FileResponse(open('EOA_To_MENO_MEOR.csv', 'rb'), as_attachment=True,
                                         filename='From_EOA_Merge_To_MENO_MEOR.csv')
                 return response
 

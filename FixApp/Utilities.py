@@ -1,4 +1,5 @@
 import csv
+import time
 from io import StringIO
 import pandas as pd
 import numpy as np
@@ -413,7 +414,9 @@ def readCSV():
 
 def from_EOA_to_MENO(filePath, CAT_IM_ID, FD_ID, Trading_Session):
     try:
+        print("EOA TO MENO")
         df = pd.read_csv(filePath)
+
         df = df[df['Event Type'] == 'EOA']
         fileName = filePath.split("\\")[-1]
         columns = ['Order Event', 'Fix_Col_0', 'FirmROID', 'MsgType', 'CAT_IM_ID',
@@ -431,7 +434,7 @@ def from_EOA_to_MENO(filePath, CAT_IM_ID, FD_ID, Trading_Session):
                 + (df.index + 0).astype(str))
         new_df['Order Event'] = 'NEW'
 
-        filtered_df = df[df['Event Type'] != 'EOM']
+        filtered_df = df[df['Event Type'] == 'EOA']
         # Check if all rows in the filtered DataFrame have Event Type as MEOA
         if (filtered_df['Event Type'] == 'EOA').all():
             # Replace Event Type with MENO
@@ -457,10 +460,17 @@ def from_EOA_to_MENO(filePath, CAT_IM_ID, FD_ID, Trading_Session):
         new_df['Fix_Col_7'] = 'False'
         new_df['Fix_Col_8'] = ''
         # new_df['SideType'] = df['Side']
-        filtered_df = df[(df['Side'] == 'Sh') | (df['Side'] == 'Bu') | (df['Side'] == 'Se')]
-        new_df.loc[filtered_df['Side'] == 'Sh', 'SideType'] = 'SS'
-        new_df.loc[filtered_df['Side'] == 'Bu', 'SideType'] = 'B'
-        new_df.loc[filtered_df['Side'] == 'Se', 'SideType'] = 'SL'
+        new_df['SideType'] = np.where(filtered_df['Side'].isin(['Sh', 'Short']), 'SS',
+                                      np.where(filtered_df['Side'].isin(['Bu', 'Buy']), 'B', 'SL'))
+
+        # filtered_df = df[(df['Side'] == 'Sh') | (df['Side'] == 'Bu') | (df['Side'] == 'Se') |
+        #                  (df['Buy'] == 'B') | (df['Side'] == 'Buy') | (df['Side'] == 'Sell') | (df['Side'] == 'Short')]
+        # new_df.loc[filtered_df['Side'] == 'Sh', 'SideType'] = 'SS'
+        # new_df.loc[filtered_df['Side'] == 'Bu', 'SideType'] = 'B'
+        # new_df.loc[filtered_df['Side'] == 'Se', 'SideType'] = 'SL'
+        # new_df.loc[filtered_df['Side'] == 'Buy', 'SideType'] = 'B'
+        # new_df.loc[filtered_df['Side'] == 'Sell', 'SideType'] = 'SL'
+        # new_df.loc[filtered_df['Side'] == 'Short', 'SideType'] = 'SS'
 
         if df['Price'].eq('').all():  # check if Price has no value then replace with empty
             df.loc[df['Price'] == '', 'Price'] = ''
@@ -505,14 +515,14 @@ def from_EOA_to_MENO(filePath, CAT_IM_ID, FD_ID, Trading_Session):
             # except Exception as e:
             #     print("Error Occur while Downloading file EOA_TO_MENO ! :" + str(e))
             #     return render(request, 'EOA.html', {'message': "Error Occur while Downloading file EOA_TO_MENO !"})
-            EOAInsertion(new_df, 'MENO')
+            # EOAInsertion(new_df, 'MENO')
             return new_df
         except Exception as e:
-            print("CSV to DataFrame Exception :-" + str(e))
+            print("CSV to DataFrame Exception from_EOA_to_MENO :-" + str(e))
             return str("CSV to DataFrame Exception :- " + str(e))
 
     except Exception as e:
-        print("Read CSV Error Exception :" + str(e))
+        print("Read CSV Error Exception from_EOA_to_MENO  :" + str(e))
         return str("Read CSV Exception :- " + str(e))
 
 
@@ -520,7 +530,6 @@ def from_EOA_to_MEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
     try:
         print("File Path", str(filePath))
         df = pd.read_csv(filePath)
-        print(df['Event Type'])
         df = df[df['Event Type'] == 'EOA']
         df_MENO = pd.read_csv("EOA_To_MENO.csv")
         last_FirmROID_MENO = df_MENO.tail(1)
@@ -530,11 +539,12 @@ def from_EOA_to_MEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
         fileName = filePath.split("\\")[-1]
         columns = ['Order Event', 'Fix_Col_0', 'FirmROID', 'MsgType', 'CAT_IM_ID', 'Date', 'Order ID', 'Symbol',
                    'Fix_Col_1', 'TimeStamp', 'Fix_Col_2', 'Fix_Col_3', 'Fix_Col_4', 'Sender_IM_ID',
-                   'Receiver_IM_ID', 'Firm_Exchange', 'Routed_OrderID', 'Session', 'SideType', 'Price', 'Quantity',
+                   'Destination', 'Firm_Exchange', 'Routed_OrderID', 'Session', 'SideType', 'Price', 'Quantity',
                    'Fix_Col_6', 'OrderType', 'TIF', 'Trading_Session', 'Fix_Col_7', 'Fix_Col_8', 'Fix_Col_9',
                    'Fix_Col_10', 'Fix_Col_11', 'Fix_Col_12', 'Fix_Col_13', 'Fix_Col_14', 'Fix_Col_15', 'Fix_Col_16',
                    'Fix_Col_17', 'Fix_Col_18']
 
+        print("Receiver IMID", df['Receiver IMID'])
         new_df = pd.DataFrame(columns=columns)
         new_df['Fix_Col_0'] = ''
         for i, row in df.iterrows():
@@ -568,11 +578,10 @@ def from_EOA_to_MEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
         new_df['Fix_Col_3'] = 'False'
         new_df['Fix_Col_4'] = ''
         new_df['Sender_IM_ID'] = "126588:" + df['Sender IMID']
-        new_df['Receiver_IM_ID'] = df['Receiver IMID']
         new_df['Firm_Exchange'] = 'E'
+        new_df['Destination'] = df['Receiver IMID']
 
         new_df['Routed_OrderID'] = df['Routed Order ID']
-        # new_df['Session'] = ''
 
         filtered_df = df[
             (df['Receiver IMID'] == 'ARCA') | (df['Receiver IMID'] == 'BYX') | (df['Receiver IMID'] == 'BZX') | (
@@ -581,23 +590,29 @@ def from_EOA_to_MEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
                     df['Receiver IMID'] == 'MEMX')
             | (df['Receiver IMID'] == 'IEX') | (df['Receiver IMID'] == 'NYSE') | (df['Receiver IMID'] == 'PSX')]
 
-        new_df['Session'] = df['Receiver IMID']
         new_df.loc[filtered_df['Receiver IMID'] == 'ARCA', 'Session'] = 'PFSUCSSB01'
-        new_df.loc[filtered_df['Receiver IMID'] == 'BYX', 'Session'] = 'BYX'
+        new_df.loc[filtered_df['Receiver IMID'] == 'BYX', 'Session'] = 'SCSY0001'
         new_df.loc[filtered_df['Receiver IMID'] == 'BZX', 'Session'] = 'SCSY0002'
         new_df.loc[filtered_df['Receiver IMID'] == 'EDGA', 'Session'] = 'SCSY0005'
         new_df.loc[filtered_df['Receiver IMID'] == 'EDGX', 'Session'] = 'SCSY0005'
-        new_df.loc[filtered_df['Receiver IMID'] == 'NSDQ', 'Session'] = 'S160R0'
+        new_df.loc[filtered_df['Receiver IMID'] == 'NSDQ', 'Session'] = 'NFVELSB02'
         new_df.loc[filtered_df['Receiver IMID'] == 'BX', 'Session'] = 'S161B1'
         new_df.loc[filtered_df['Receiver IMID'] == 'MEMX', 'Session'] = 'VELOC001'
         new_df.loc[filtered_df['Receiver IMID'] == 'IEX', 'Session'] = 'SSUCS001'
         new_df.loc[filtered_df['Receiver IMID'] == 'NYSE', 'Session'] = 'NFVELSB01'
         new_df.loc[filtered_df['Receiver IMID'] == 'PSX', 'Session'] = 'S161P0'
 
-        filtered_df = df[(df['Side'] == 'Sh') | (df['Side'] == 'Bu') | (df['Side'] == 'Se')]
-        new_df.loc[filtered_df['Side'] == 'Sh', 'SideType'] = 'SS'
-        new_df.loc[filtered_df['Side'] == 'Bu', 'SideType'] = 'B'
-        new_df.loc[filtered_df['Side'] == 'Se', 'SideType'] = 'SL'
+        new_df['SideType'] = np.where(filtered_df['Side'].isin(['Sh', 'Short']), 'SS',
+                                      np.where(filtered_df['Side'].isin(['Bu', 'Buy']), 'B', 'SL'))
+
+        # filtered_df = df[(df['Side'] == 'Sh') | (df['Side'] == 'Bu') | (df['Side'] == 'Se') |
+        #                  (df['Buy'] == 'B') | (df['Side'] == 'Buy') | (df['Side'] == 'Sell') | (df['Side'] == 'Short')]
+        # new_df.loc[filtered_df['Side'] == 'Sh', 'SideType'] = 'SS'
+        # new_df.loc[filtered_df['Side'] == 'Bu', 'SideType'] = 'B'
+        # new_df.loc[filtered_df['Side'] == 'Se', 'SideType'] = 'SL'
+        # new_df.loc[filtered_df['Side'] == 'Buy', 'SideType'] = 'B'
+        # new_df.loc[filtered_df['Side'] == 'Sell', 'SideType'] = 'SL'
+        # new_df.loc[filtered_df['Side'] == 'Short', 'SideType'] = 'SS'
 
         if df['Price'].eq('').all():  # check if Price has no value then replace with empty
             df.loc[df['Price'] == '', 'Price'] = ''
@@ -624,7 +639,7 @@ def from_EOA_to_MEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
                              FileType='CSV', Status='Completed', FileName=fileName)
             report.save()
             new_df.to_csv('EOA_To_MEOR.csv', header=False, index=False)
-            EOAInsertion(new_df, 'MEOR')
+            # EOAInsertion(new_df, 'MEOR')
             # try:
             #     return downloadCSV(new_df, 'EOA_To_MEOR.csv')
             # except Exception as e:
@@ -642,14 +657,28 @@ def from_EOA_to_MEOR(filePath, CAT_IM_ID, FD_ID, Trading_Session):
 
 def merge_MENO_MEOR():
     try:
-        print("EOA_To_MENO")
-        with open('EOA_To_MENO.csv', 'a', newline='') as f:
-            writer = csv.writer(f)
-            with open('EOA_To_MEOR.csv', 'r') as f:
-                reader = csv.reader(f)
-                next(reader, None)
-                for row in reader:
+        with open('EOA_To_MENO_MEOR.csv', 'w', newline='') as outfile:
+            writer = csv.writer(outfile)
+            with open('EOA_To_MENO.csv', 'r') as file1, open('EOA_To_MEOR.csv', 'r') as file2:
+                reader1 = csv.reader(file1)
+                next(reader1, None)
+                reader2 = csv.reader(file2)
+                for row in reader1:
                     writer.writerow(row)
+                for row in reader2:
+                    writer.writerow(row)
+
+            # with open('EOA_To_MEOR.csv', 'r') as f:
+            #     reader = csv.reader(f)
+            #     for row in reader:
+            #         writer.writerow(row)
+
+        # with open('EOA_To_MENO.csv', 'a', newline='') as f:
+        #     writer = csv.writer(f)
+        #     with open('EOA_To_MEOR.csv', 'r') as f:
+        #         reader = csv.reader(f)
+        #         for row in reader:
+        #             writer.writerow(row)
 
         pass
     except Exception as e:
@@ -761,7 +790,6 @@ def EOAInsertion(dataframe, type):
 def Fix_tags_bulk_insertion(tags):
     try:
         print("Fix_tags_bulk_insertion...........")
-        print(tags)
         FixTags.objects.bulk_create([
             FixTags(tag=tag['tag_number'], value=tag['tag_value'], tag_name=tag['tag_name'], tag_desc='')
             for tag in tags])

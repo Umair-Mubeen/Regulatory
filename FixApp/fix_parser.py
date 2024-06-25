@@ -2,7 +2,7 @@ import argparse
 import sys
 import xml.etree.ElementTree as ET
 from .Utilities import Fix_tags_bulk_insertion
-
+import re
 
 def main():
     parser = FIXParser()
@@ -142,6 +142,7 @@ class FIXParser:
 
     def parse_input_file(self):
         try:
+            delimiter = ['','|']
             input_file = open('Fix_Messages.txt', "r")
             line = input_file.readline()
             output_file = open('output.txt', "w")
@@ -150,7 +151,15 @@ class FIXParser:
                 if line == "" or line[0] == "#":
                     line = input_file.readline()
                     continue
+                if line in delimiter:
+                    print("True Delimiter !")
+                else:
+                    print("False Delimiter")
+
+
                 tags = line.split("|")  #  |  make list of tags using the delimiter |
+                #tags = re.split(delimiter,line)
+                #print(tags)
                 self.make_readable(tags, output_file)
                 output_file.write(self.msg_separator)
                 line = input_file.readline()

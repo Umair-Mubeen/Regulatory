@@ -18,4 +18,7 @@ urlpatterns = [
     path('FixParser', views.FixParser, name='FixParser'),
     path('Fix-Parse-Details', views.FixParserDetails, name='Fix-Parse-Details'),
     path('grid-system', views.gridSystem, name='gridSystem'),
+    path('downloadEOA', views.downloadEOA, name='downloadEOA'),
+    path('downloadMEOA', views.downloadMEOA, name='downloadMEOA'),
+
 ]
